@@ -1,0 +1,14 @@
+﻿@model ONT_3rdyear_Project.Models.Instruction
+
+@{
+	ViewData["Title"] = "View Doctor Advice";
+}
+
+<h3>Doctor's Intructionse</h3>
+
+<p><strong>Patient:</strong> @Model.Patient.FirstName @Model.Patient.LastName</p>
+<p><strong>Requested Advice:</strong> @Model.NurseRequest</p>
+<p><strong>Doctor's Advice:</strong> @Model.Instructions</p>
+@* <p><strong>Responded At:</strong> @Model.RespondedAt?.ToString("g")</p>
+ *@
+<a asp-action="InstructionList" class="btn btn-secondary">Back to List</a>

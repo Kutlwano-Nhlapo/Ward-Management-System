@@ -1,0 +1,98 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Ward>
+@{
+    ViewData["Title"] = "Wards";
+    ViewData["ActivePage"] = "Wards"; // Set the active page for the navigation bar
+}
+<head>
+ <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+</head>
+<div class="dashboard-wrapper ">
+<div class="container">
+    <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">           
+                <h1><i class="fas fa-bed"></i>Wards</h1>                
+                <div class="d-flex gap-2">                   
+                        <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                            <i class="bi bi-arrow-left"></i>
+                            Back
+                        </a>
+                </div>
+            </div>
+        </div>
+    <form asp-action="Wards" method="get" class="mb-3">
+    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" 
+           placeholder="Search wards..." class="form-control d-inline-block w-auto" />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+<div class="orders-table-wrapper">           
+                <div class="table-responsive">
+                    <table class="table orders-table mb-0">    
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Capacity</th>
+                            <th>Action</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ward in Model)
+                        {
+                            <tr>
+                                <td>@ward.Name</td>
+                                <td>@ward.Capacity</td>
+                                <td>
+                                    <a asp-action="GetConsumablesByWard" asp-controller="Consumable" asp-route-wardId="@ward.WardID" class="btn btn-warning">Edit</a>
+                                    <a data-ward-id="@ward.WardID" data-ward-name="@ward.Name" class="btn btn-primary openModalBtn2" >Add Consumable</a>
+                                    <div id="modalContainer2"></div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                </div>
+</div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+             document.addEventListener("DOMContentLoaded", function () {          
+                const modalContainer = document.getElementById("modalContainer2");
+
+                 document.querySelectorAll(".openModalBtn2").forEach(button => {
+                    button.addEventListener("click", function () {
+                        const wardId = this.dataset.wardId;
+                        const wardName = this.dataset.wardName;
+
+                        fetch(`@Url.Action("AddConsumableDirect", "Consumable")?wardId=${wardId}`)
+                            .then(response => response.text())
+                            .then(html => {
+                                modalContainer.innerHTML = html;
+
+                                // Optional: set modal title dynamically
+                                const modalTitle = document.getElementById("addConsumableModalTitle");
+                                if (modalTitle) modalTitle.textContent = `Add Consumable to ${wardName}`;
+
+                                const modal = new bootstrap.Modal(document.getElementById('addConsumableDirectModal'));
+                                modal.show();
+                            });
+                    });
+                });
+
+                
+            });
+        document.addEventListener("DOMContentLoaded", function () {
+            const openModalBtn = document.getElementById("openModalBtn");
+            const modalContainer = document.getElementById("modalContainer");
+            openModalBtn.addEventListener("click", function () {
+                fetch('@Url.Action("AddWard", "Consumable", new { partial = true })')
+                    .then(response => response.text())
+                    .then(html => {
+                        modalContainer.innerHTML = html;
+                        const addConsumableModal = new bootstrap.Modal(document.getElementById('addWardModal'));
+                        addConsumableModal.show();
+                    });
+            });
+        });
+    </script>
+}

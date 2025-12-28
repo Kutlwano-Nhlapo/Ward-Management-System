@@ -1,0 +1,1009 @@
+﻿@model ONT_3rdyear_Project.Models.Patient
+@{
+    ViewData["Title"] = "Patient Details";
+    var today = DateTime.Now.Date;
+    var dob = Model.DateOfBirth;
+    var age = today.Year - dob.Year;
+    
+    if (today < dob.AddYears(age)) age--;
+}
+
+<div class="patient-details-wrapper">
+    <!-- Header Section -->
+    <div class="details-header">
+        <div class="header-content">
+            <div class="back-navigation">
+                <a asp-action="AllPatients" class="btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Patients</span>
+                </a>
+            </div>
+            <div class="patient-header-info">
+                <div class="patient-avatar-large">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="patient-title-info">
+                    <h1 class="patient-name">@Model.FirstName @Model.LastName</h1>
+                    <div class="patient-meta">
+                        <span class="separator">•</span>
+                        <span class="patient-age">@age years old</span>
+                        <span class="separator">•</span>
+                        <span class="admission-status @(Model.Admitted ? "status-admitted" : "status-outpatient")">
+                            <i class="bi @(Model.Admitted ? "bi-hospital-fill" : "bi-person-check")"></i>
+                            @(Model.Admitted ? "Currently Admitted" : "Outpatient")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="details-content">
+        <div class="content-grid">
+            <!-- Personal Information Card -->
+            <div class="info-card personal-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-person-badge"></i>
+                        Personal Information
+                    </h3>
+                    <span class="card-badge">Primary</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label class="info-label">Full Name</label>
+                            <div class="info-value name-value">
+                                <strong>@Model.FirstName @Model.LastName</strong>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Gender</label>
+                            <div class="info-value">
+                                <span class="gender-badge gender-@Model.Gender.ToLower()">
+                                    <i class="bi bi-gender-@(Model.Gender.ToLower() == "male" ? "male" : Model.Gender.ToLower() == "female" ? "female" : "ambiguous")"></i>
+                                    @Model.Gender
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <label class="info-label">Date of Birth</label>
+                            <div class="info-value">
+                                <div class="date-info">
+                                    <strong>@Model.DateOfBirth.ToString("MMMM dd, yyyy")</strong>
+                                    <small class="age-indicator">@age years old</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Information Card -->
+            <div class="info-card medical-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-heart-pulse"></i>
+                        Medical Information
+                    </h3>
+                    <span class="card-badge medical">Medical</span>
+                </div>
+                <div class="card-body">
+                    <div class="medical-section">
+                        <label class="info-label">Chronic Conditions & Medical History</label>
+                        <div class="medical-conditions">
+                            @if (!string.IsNullOrEmpty(Model.ChronicIllness) && Model.ChronicIllness.ToLower() != "none" && Model.ChronicIllness.ToLower() != "n/a")
+                            {
+                                <div class="condition-item">
+                                    <i class="bi bi-exclamation-triangle-fill condition-icon"></i>
+                                    <div class="condition-details">
+                                        <p class="condition-text">@Model.ChronicIllness</p>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-conditions">
+                                    <i class="bi bi-shield-check text-success"></i>
+                                    <span class="text-success">No chronic conditions reported</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="medical-alerts">
+                        <label class="info-label">Medical Alerts</label>
+                        <div class="alert-items">
+                            @if (!string.IsNullOrEmpty(Model.ChronicIllness) && Model.ChronicIllness.ToLower() != "none" && Model.ChronicIllness.ToLower() != "n/a")
+                            {
+                                <div class="alert-item high-priority">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <span>Review chronic conditions before treatment</span>
+                                </div>
+                            }
+                            <div class="alert-item info">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <span>Always verify allergies before medication</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admission Status Card -->
+            <div class="info-card admission-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-hospital"></i>
+                        Admission Status
+                    </h3>
+                    <span class="card-badge @(Model.Admitted ? "admitted" : "outpatient")">
+                        @(Model.Admitted ? "Admitted" : "Outpatient")
+                    </span>
+                </div>
+                <div class="card-body">
+                    @if (Model.Admitted)
+                    {
+                        <div class="admission-active">
+                            <div class="admission-indicator">
+                                <i class="bi bi-hospital-fill text-success"></i>
+                                <strong class="text-success">Currently Admitted</strong>
+                            </div>
+                            <div class="admission-details">
+                                <div class="admission-item">
+                                    <span class="label">Admission Date:</span>
+                                    <span class="value">@Model.Admissions.AdmissionDate</span> <!-- Replace with actual admission date -->
+                                </div>
+                                <div class="admission-item">
+                                    <span class="label">Ward:</span>
+                                    <span class="value">@Model.Admissions.Ward.Name</span> <!-- Replace with actual ward -->
+                                </div>
+                                <div class="admission-item">
+                                    <span class="label">Bed Number:</span>
+                                    <span class="value">@Model.Admissions.Bed.BedNo</span> <!-- Replace with actual bed -->
+                                </div>
+                            </div>
+                            <a class="btn btn-info btn-sm mt-3" asp-action="PatientAdmission">
+                                <i class="bi bi-clipboard2-data"></i>
+                                View Full Admission Details
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="admission-outpatient">
+                            <div class="outpatient-indicator">
+                                <i class="bi bi-person-check text-info"></i>
+                                <strong class="text-info">Outpatient Status</strong>
+                            </div>
+                            <p class="outpatient-description">
+                                This patient is not currently admitted to the hospital. 
+                                All treatments and consultations are on an outpatient basis.
+                            </p>
+                            <a class="btn btn-primary btn-sm" asp-action="AdmitPatientStep1">
+                                <i class="bi bi-hospital"></i>
+                                Admit Patient
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            @*<div class="info-card actions-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-lightning"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn medical-history" onclick="viewMedicalHistory(@Model.PatientID)">
+                            <i class="bi bi-journal-medical"></i>
+                            <span>Medical History</span>
+                        </button>
+                        <button class="quick-action-btn allergies" onclick="viewAllergies(@Model.PatientID)">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span>Allergies</span>
+                        </button>
+                        <button class="quick-action-btn lab-results" onclick="viewLabResults(@Model.PatientID)">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                            <span>Lab Results</span>
+                        </button>
+                        <button class="quick-action-btn prescriptions" onclick="viewPrescriptions(@Model.PatientID)">
+                            <i class="bi bi-capsule"></i>
+                            <span>Prescriptions</span>
+                        </button>
+                        <button class="quick-action-btn appointments" onclick="viewAppointments(@Model.PatientID)">
+                            <i class="bi bi-calendar-event"></i>
+                            <span>Appointments</span>
+                        </button>
+                        <button class="quick-action-btn notes" onclick="addClinicalNote(@Model.PatientID)">
+                            <i class="bi bi-file-text"></i>
+                            <span>Clinical Notes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>*@
+
+            <!-- Recent Activity Timeline -->
+            @*<div class="info-card timeline-info full-width">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-clock-history"></i>
+                        Recent Activity
+                    </h3>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="viewFullHistory(@Model.PatientID)">
+                        View All
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="activity-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <strong>Patient Registration</strong>
+                                    <span class="timeline-date">Today, 2:30 PM</span>
+                                </div>
+                                <p class="timeline-description">Patient @Model.FirstName @Model.LastName was registered into the system.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info">
+                                <i class="bi bi-clipboard2-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <strong>Initial Assessment</strong>
+                                    <span class="timeline-date">Today, 2:45 PM</span>
+                                </div>
+                                <p class="timeline-description">Initial medical assessment completed by Dr. Smith.</p>
+                            </div>
+                        </div>
+                        @if (Model.Admitted)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success">
+                                    <i class="bi bi-hospital"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-header">
+                                        <strong>Hospital Admission</strong>
+                                        <span class="timeline-date">5 days ago</span>
+                                    </div>
+                                    <p class="timeline-description">Patient admitted to General Ward A, Bed A-105.</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>*@
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --success-green: #28a745;
+        --warning-yellow: #ffc107;
+        --danger-red: #dc3545;
+        --info-blue: #17a2b8;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --text-muted: #9ca3af;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+        line-height: 1.6;
+    }
+
+    .patient-details-wrapper {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    /* Header Section */
+    .details-header {
+        padding: 0 2rem 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        transition: var(--transition);
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+
+    .patient-header-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .patient-avatar-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        box-shadow: var(--shadow-medium);
+    }
+
+    .patient-avatar-large i {
+        font-size: 3rem;
+        color: var(--primary-blue);
+    }
+
+    .patient-name {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.2;
+    }
+
+    .patient-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .patient-id {
+        font-family: 'Monaco', 'Menlo', monospace;
+        background: var(--bg-primary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .separator {
+        color: var(--text-muted);
+    }
+
+    .patient-age {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .admission-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .status-admitted {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-outpatient {
+        background: #e2e3e5;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .patient-registered {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #005c94;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+    /* Main Content */
+    .details-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        grid-auto-rows: min-content;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        overflow: hidden;
+    }
+
+    .info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-badge {
+        background: var(--primary-light);
+        color: var(--primary-blue);
+    }
+
+    .card-badge.medical {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .card-badge.admitted {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .card-badge.outpatient {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    /* Personal Info */
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--text-primary);
+    }
+
+    .name-value {
+        font-size: 1.125rem;
+    }
+
+    .gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .gender-male {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .gender-female {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+
+    .gender-other {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .date-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .age-indicator {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .patient-id-code {
+        background: var(--bg-primary);
+        color: var(--primary-blue);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-family: 'Monaco', monospace;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Medical Info */
+    .medical-section {
+        margin-bottom: 2rem;
+    }
+
+    .medical-conditions {
+        margin-top: 1rem;
+    }
+
+    .condition-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.5rem;
+    }
+
+    .condition-icon {
+        color: #856404;
+        font-size: 1.25rem;
+        margin-top: 0.125rem;
+    }
+
+    .condition-text {
+        margin: 0;
+        color: #856404;
+        line-height: 1.6;
+    }
+
+    .no-conditions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: var(--border-radius);
+    }
+
+    .medical-alerts {
+        margin-top: 2rem;
+    }
+
+    .alert-items {
+        margin-top: 1rem;
+    }
+
+    .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .alert-item.high-priority {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-item.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #b8daff;
+    }
+
+    /* Admission Info */
+    .admission-active,
+    .admission-outpatient {
+        text-align: center;
+    }
+
+    .admission-indicator,
+    .outpatient-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 1.125rem;
+    }
+
+    .admission-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+
+    .admission-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .admission-item .label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .admission-item .value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .outpatient-description {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    /* Quick Actions */
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .quick-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        background: var(--bg-primary);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: var(--transition);
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        border-color: var(--primary-blue);
+        color: var(--primary-blue);
+        background: white;
+    }
+
+    .quick-action-btn i {
+        font-size: 1.5rem;
+    }
+
+    /* Timeline */
+    .activity-timeline {
+        position: relative;
+    }
+
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--border-color);
+    }
+
+    .timeline-item {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .timeline-marker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        position: relative;
+        z-index: 1;
+        border: 3px solid white;
+        box-shadow: var(--shadow-light);
+    }
+
+    .timeline-content {
+        flex: 1;
+        padding-top: 0.5rem;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .timeline-date {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .timeline-description {
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .patient-header-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .patient-details-wrapper {
+            padding: 1rem 0;
+        }
+
+        .details-header {
+            padding: 0 1rem 1rem;
+        }
+
+        .details-content {
+            padding: 0 1rem;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .patient-header-info {
+            text-align: center;
+        }
+
+        .patient-name {
+            font-size: 2rem;
+        }
+
+        .patient-meta {
+            justify-content: center;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .admission-details {
+            grid-template-columns: 1fr;
+        }
+
+        .quick-actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .timeline-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .patient-avatar-large {
+            width: 60px;
+            height: 60px;
+        }
+
+        .patient-avatar-large i {
+            font-size: 2rem;
+        }
+
+        .patient-name {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Print Styles */
+    @@media print {
+        body {
+            background: white !important;
+        }
+
+        .patient-details-wrapper {
+            box-shadow: none !important;
+        }
+
+        .btn, .header-actions, .quick-actions-grid {
+            display: none !important;
+        }
+
+        .info-card {
+            break-inside: avoid;
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+
+        .content-grid {
+            display: block;
+        }
+
+        .info-card {
+            margin-bottom: 2rem;
+        }
+    }
+
+    /* Custom Animations */
+    .fade-in {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+    .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+    .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    
+</script>

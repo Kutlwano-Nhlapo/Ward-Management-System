@@ -1,0 +1,22 @@
+﻿@model ONT_3rdyear_Project.ViewModels.RequestInstructionViewModel
+@{
+    ViewData["Title"] = "Request Doctor Instruction";
+}
+
+<h3>Request Doctor Instruction</h3>
+
+<form asp-action="CreateRequest" method="post">
+    <input type="hidden" name="patientId" value="@ViewBag.PatientID" />
+
+    <div class="form-group">
+        <label>Patient Name</label>
+        <input type="text" class="form-control" value="@ViewBag.PatientName" disabled />
+    </div>
+
+    <div class="form-group mt-2">
+        <label for="message">Message or Note to Doctor (optional):</label>
+        <textarea name="message" class="form-control" rows="4" placeholder="E.g., Patient is not responding to medication..."></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Send Request</button>
+</form>

@@ -1,0 +1,597 @@
+﻿@model IEnumerable<Patient>
+@{
+    ViewData["Title"] = "All Patients";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="~/css/WardAdmin/AllPatients.css" rel="stylesheet" asp-append-version="true">
+
+<div class="patients-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="patients-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="breadcrumb-nav">
+                    <a href="@Url.Action("Index", "WardAdmin")" class="breadcrumb-link">
+                        <i class="bi bi-house-door"></i>
+                        Dashboard
+                    </a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span class="breadcrumb-current">All Patients</span>
+                </div>
+                <div class="title-section">
+                    <h1 class="page-title">
+                        <i class="bi bi-people-fill"></i>
+                        Patient Management
+                    </h1>
+                    <p class="page-subtitle">Comprehensive patient records and management</p>
+                </div>
+                <div class="header-actions">
+                    <a href="@Url.Action("Create", "WardAdmin")" class="btn btn-primary">
+                        <i class="bi bi-person-plus-fill"></i>
+                        Add New Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-container success">
+            <div class="container">
+                <div class="alert alert-success">
+                    <div class="alert-content">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <div class="alert-text">
+                            <strong>Success!</strong>
+                            <p>@TempData["SuccessMessage"]</p>
+                        </div>
+                    </div>
+                    <button type="button" class="alert-close" onclick="closeAlert(this)">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-container error">
+            <div class="container">
+                <div class="alert alert-danger">
+                    <div class="alert-content">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div class="alert-text">
+                            <strong>Error!</strong>
+                            <p>@TempData["ErrorMessage"]</p>
+                        </div>
+                    </div>
+                    <button type="button" class="alert-close" onclick="closeAlert(this)">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Main Content -->
+    <div class="patients-content">
+        <div class="container">
+            <!-- Search and Filter Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <form asp-action="Search" method="post" class="search-form">
+                        <div class="search-input-group">
+                            <i class="bi bi-search"></i>
+                            <input type="text" name="query" class="search-input" placeholder="Search by patient name..." required />
+                            <button type="submit" class="search-btn">
+                                Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <label class="filter-label">Filter by Status:</label>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="all">All Patients</option>
+                            <option value="admitted">Admitted</option>
+                            <option value="not-admitted">Not Admitted</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients Summary Cards -->
+            <div class="summary-cards">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="summary-card total">
+                            <div class="card-icon">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 id="totalPatients">@Model.Count()</h3>
+                                <p>Total Patients</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card admitted">
+                            <div class="card-icon">
+                                <i class="bi bi-hospital-fill"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 id="admittedPatients">@Model.Count(p => p.Admitted)</h3>
+                                <p>Currently Admitted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card available">
+                            <div class="card-icon">
+                                <i class="bi bi-door-open-fill"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 id="availablePatients">@Model.Count(p => !p.Admitted)</h3>
+                                <p>Not Admitted</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-card recent">
+                            <div class="card-icon">
+                                <i class="bi bi-clock-fill"></i>
+                            </div>
+                            <div class="card-content">
+                                <h3 id="recentPatients" class="pulse">0</h3>
+                                <p>Pending Admissions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patients Table -->
+            <div class="patients-table-container">
+                <div class="table-header">
+                    <h3>Patient Records</h3>
+                    <div class="table-actions">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table patients-table" id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-person-circle"></i>
+                                        First Name
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-person-circle"></i>
+                                        Last Name
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-gender-ambiguous"></i>
+                                        Gender
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-calendar-date"></i>
+                                        Date of Birth
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-hospital"></i>
+                                        Status
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="th-content">
+                                        <i class="bi bi-bed-fill"></i>
+                                        Location
+                                    </span>
+                                </th>
+                                <th class="text-center">
+                                    <span class="th-content">
+                                        <i class="bi bi-gear-fill"></i>
+                                        Actions
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var patient in Model)
+                            {
+                                <tr class="patient-row" data-status="@(patient.Admitted ? "admitted" : "not-admitted")">
+                                    <td>
+                                        <div class="patient-info">
+                                            <div class="patient-avatar">
+                                                @if (patient.Gender == "Male")
+                                                {
+                                                    <i class="bi bi-person-fill text-primary"></i>
+                                                }
+                                                else if (patient.Gender == "Female")
+                                                {
+                                                    <i class="bi bi-person-fill text-danger"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-person-fill text-secondary"></i>
+                                                }
+                                            </div>
+                                            <div class="patient-details">
+                                                <strong>@patient.FirstName</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="patient-details">
+                                            <strong>@patient.LastName</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="gender-badge gender-@patient.Gender?.ToLower()">
+                                            @patient.Gender
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="date-info">
+                                            <span class="date">@patient.DateOfBirth.ToString("dd/MM/yyyy")</span>
+                                            <small class="age">Age: @(DateTime.Now.Year - patient.DateOfBirth.Year) years</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (patient.Admitted)
+                                        {
+                                            <span class="status-badge status-admitted">
+                                                <i class="bi bi-hospital-fill"></i>
+                                                Admitted
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-available">
+                                                <i class="bi bi-door-open-fill"></i>
+                                                Not Admitted
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (patient.Admitted && patient.Admissions != null)
+                                        {
+                                            <div class="location-info">
+                                                <span class="ward">Ward: @patient.Admissions.Ward?.Name</span>
+                                                <small class="bed">Bed: @patient.Admissions.Bed?.BedNo</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not assigned</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="action-buttons">
+                                            <!-- View Patient Details -->
+                                            <button class="btn btn-sm btn-outline-info"
+                                                    onclick="viewPatientDetails(@patient.PatientID)"
+                                                    title="View Details">
+                                                <i class="bi bi-eye-fill"></i>
+                                            </button>
+
+                                            <!-- Edit Patient (Modal) -->
+                                            <button class="btn btn-sm btn-outline-warning"
+                                                    onclick="editPatient(@patient.PatientID)"
+                                                    title="Edit Patient">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            <!-- Conditional Admission/Show Admission Button -->
+                                            @if (patient.Admitted)
+                                            {
+                                                <button class="btn btn-sm btn-success"
+                                                        onclick="showAdmissionDetails(@patient.PatientID)"
+                                                        title="Show Admission">
+                                                    <i class="bi bi-clipboard2-pulse"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <!-- Direct link to admission page -->
+                                                <a href="@Url.Action("AdmitPatientStep1", "WardAdmin", new { patientId = patient.PatientID })"
+                                                   class="btn btn-sm btn-primary"
+                                                   title="Admit Patient">
+                                                    <i class="bi bi-hospital"></i>
+                                                </a>
+                                            }
+
+                                            <!-- Medical History (Modal) -->
+                                            <button class="btn btn-sm btn-outline-success"
+                                                    onclick="viewMedicalHistory(@patient.PatientID)"
+                                                    title="Medical History">
+                                                <i class="bi bi-journal-medical"></i>
+                                            </button>
+
+                                            <!-- Allergies (Modal) -->
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="viewAllergies(@patient.PatientID)"
+                                                    title="Allergies">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                            </button>
+
+                                            <button class="btn btn-sm btn-outline-danger" href="@Url.Action("SoftDelete", "WardAdmin", new { id = patient.PatientID })"
+                                                    onclick="deletePatient(@patient.PatientID)">
+                                                
+                                                <i class="bi bi-archive-fill"></i>                                                  
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Details Modal -->
+<div class="modal fade" id="patientDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-circle"></i>
+                    Patient Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="patientDetailsBody">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading patient details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Patient Modal -->
+<div class="modal fade" id="editPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil-square"></i>
+                    Edit Patient Information
+                </h5>
+                <p class="modal-subtitle">Update patient details and medical information </p>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editPatientBody">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading patient information...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical History Modal -->
+<div class="modal fade" id="medicalHistoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-journal-medical"></i>
+                    Medical History
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="medicalHistoryBody">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading medical history...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Allergies Modal -->
+<div class="modal fade" id="allergiesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Patient Allergies
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="allergiesBody">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading allergy information...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admission Details Modal -->
+<div class="modal fade" id="admissionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Admission Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="admissionBody">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading admission details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts
+        setTimeout(function() {
+            closeAllAlerts();
+        }, 5000);
+
+        function closeAlert(button) {
+            const alert = button.closest('.alert-container');
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-20px)';
+            setTimeout(() => alert.remove(), 300);
+        }
+
+        function closeAllAlerts() {
+            document.querySelectorAll('.alert-container').forEach(closeAlert);
+        }
+
+        // Filter functionality
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.querySelectorAll('.patient-row');
+
+            rows.forEach(row => {
+                const status = row.dataset.status;
+                if (filterValue === 'all' || status === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateCounts();
+        });
+
+        // Modal functions
+        function loadModal(url, modalId, bodyId) {
+            const body = document.getElementById(bodyId);
+            body.innerHTML = '<div class="text-center p-3"><div class="spinner-border"></div></div>';
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    body.innerHTML = html;
+                    const modal = new bootstrap.Modal(document.getElementById(modalId));
+                    modal.show();
+                });
+        }
+
+        function viewPatientDetails(id){
+            loadModal(`/WardAdmin/Details/${id}`, 'patientDetailsModal','patientDetailsBody');
+        }
+
+        function editPatient(id){
+            loadModal(`/WardAdmin/EditPatientModal/${id}`, 'editPatientModal','editPatientBody');
+        }
+
+        function showAdmissionDetails(id){
+            loadModal(`/WardAdmin/PatientAdmission?patientId=${id}`, 'admissionModal','admissionBody');
+        }
+
+        function viewMedicalHistory(id){
+            loadModal(`/WardAdmin/GetMedicalHistory/${id}`, 'medicalHistoryModal','medicalHistoryBody');
+        }
+
+        function viewAllergies(id){
+            loadModal(`/WardAdmin/GetPatientAllergies/${id}`, 'allergiesModal','allergiesBody');
+        }
+
+        function deletePatient(){
+            alert("are you sure you want to delete this patient?")
+        }
+
+        // AJAX submit for Add forms (delegated)
+        document.addEventListener('submit', function (e) {
+            if (e.target.id === 'addHistoryForm' || e.target.id === 'addAllergyForm' || e.target.id === 'editPatientForm') {
+                e.preventDefault();
+                const form = e.target;
+                fetch(form.action || form.getAttribute('data-action') || window.location.pathname, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Saved successfully");
+                        location.reload();
+                    } else {
+                        alert("Error saving");
+                    }
+                });
+            }
+        });
+
+        function updateCounts() {
+            const visibleRows = document.querySelectorAll('.patient-row[style=""]');
+            const admittedCount = Array.from(visibleRows).filter(row => row.dataset.status === 'admitted').length;
+            const availableCount = Array.from(visibleRows).filter(row => row.dataset.status === 'not-admitted').length;
+
+            document.getElementById('totalPatients').textContent = visibleRows.length;
+            document.getElementById('admittedPatients').textContent = admittedCount;
+            document.getElementById('availablePatients').textContent = availableCount;
+        }
+
+        function refreshTable() {
+            location.reload();
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+    </script>
+}

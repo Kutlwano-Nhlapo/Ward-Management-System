@@ -1,0 +1,306 @@
+.dashboard-wrapper {
+    min-height: 100vh;
+    background:/* #99ddff*/ url(/images/bcgr2.jpg) /*linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)*/;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;   
+    min-height: 100vh;
+    padding: 80px 0 40px 40px;
+}
+.dashboard-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: inherit; /* copies background image */
+    filter: blur(10px); /* adjust blur intensity */
+    transform: scale(1.1); /* fixes edge blur cutoff */
+    z-index: 0;
+  }
+  .page-header {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 100%;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    z-index: 1;
+}
+.container-fluid {
+    position: relative;  
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+.modal-header {
+    background: #e6f7ff !important;
+    color: #2d3748;
+    border: none;
+    padding: 1rem 2rem;
+}
+
+.prescription-modal .modal-body {
+    background: white;
+    padding: 2rem;
+   
+}
+
+.info-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: white;
+    overflow: hidden;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.info-card .card-body {
+    padding: 1rem ;
+}
+.timeline-item:hover {   
+    background: #ffffff;
+    transform: translateX(4px);
+}
+.card-title-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.info-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #2d3748;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    border-top: 1px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-top-width: 4px;
+}
+
+/* Different Status Colors */
+.stat-card.critical {
+    border-top-color: #dc2626;
+}
+.stat-card.warning {
+    border-top-color: #f59e0b;
+}
+.stat-card.info {
+    border-top-color: #3b82f6;
+}
+.stat-card.success {
+    border-top-color: #10b981;
+}
+/* 👇 Added for your “new” stat */
+.stat-card.new {
+    border-top-color: #26c1dc;
+}
+
+/* Header & Icon */
+.stat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+   
+}
+
+/* Icon color sets */
+.stat-icon.critical {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.stat-icon.warning {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+.stat-icon.info {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+.stat-icon.success {
+    background: #d1fae5;
+    color: #10b981;
+}
+/* 👇 Added for your “new” stat */
+.stat-icon.new {
+    background: #e0f7fa;
+    color: #26c1dc;
+}
+
+/* Labels & text */
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+.stat-description {
+    font-size: 0.813rem;
+    color: #9ca3af;
+}
+
+
+.medication-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.medication-item:hover {
+    border-color: #049ebb;
+    background: #f0f4ff;
+    transform: translateX(4px);
+}
+
+.medication-item::before {
+    content: " ";
+    font-size: 1.25rem;
+    margin-right: 1rem;
+}
+
+.medication-name {
+    font-weight: 600;
+    color: #2d3748;
+    flex: 1;
+}
+.prescription-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.prescription-card {   
+    border-radius: 12px;
+    animation: slideDown 0.4s ease;
+    background: white;
+}   
+.medication-dosage {
+    color: #049ebb;
+    font-weight: 500;
+    background: #f0f4ff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+}
+.medication-schedule {
+    color: #ea6666;
+    font-weight: 500;
+    background: #f0f4ff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+}
+.rejection-card {
+    border: 2px solid #dc3545;
+    border-radius: 12px;
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+prescription-card
+.action-btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-process {
+   
+    background:#3b82f6;
+    color: white;
+    border: none;
+}
+
+
+
+.btn-forward {
+    background: #44f63b;
+    color: white;
+    border: none;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+}
+
+.modal-footer {
+    background: white;
+    border-top: 2px solid #e9ecef;
+    padding: 1.25rem 2rem;
+}
+
+.section-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #99ddff , transparent);
+    margin: 1.5rem 0;
+}

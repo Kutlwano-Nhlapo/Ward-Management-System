@@ -1,0 +1,165 @@
+﻿@model ONT_3rdyear_Project.ViewModels.DashboardViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Nurse Dashboard";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="/css/Nurse1Sister/NurseStyles.css" rel="stylesheet" />
+
+
+<div class="dashboard-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <div class="nurse-photo-frame">
+                    <img src="~/images/nursee.jpeg" alt="Nurse" class="nurse-photo" />
+                    <div class="photo-overlay"></div>
+                </div>
+                <h1 class="dashboard-title">
+                    @("Welcome, Nurse " + (await UserManager.GetUserAsync(User))?.FullName)
+                </h1>
+            </div>
+            <div class="header-right">
+                <div class="time-display">
+                    <i class="bi bi-clock"></i>
+                    <span id="current-time"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation Cards -->
+        <div class="navigation-grid" id="mainNavigation">
+            <a asp-controller="Nurse" asp-action="PatientsList" class="nav-card">
+                <div class="nav-card-icon patients-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="nav-card-title">Patients</div>
+                <div class="nav-card-description">View and manage all patient records in a comprehensive table format</div>
+            </a>
+
+            <a asp-controller="Nurse" asp-action="Vitals" class="nav-card">
+                <div class="nav-card-icon vitals-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="nav-card-title">Vitals</div>
+                <div class="nav-card-description">Monitor and record patient vital signs and health metrics</div>
+            </a>
+
+            <a asp-controller="Nurse" asp-action="Treatments" class="nav-card">
+                <div class="nav-card-icon treatment-icon">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div class="nav-card-title">Treatments</div>
+                <div class="nav-card-description">Manage and track patient treatment plans and procedures</div>
+            </a>
+
+            <a asp-controller="Nurse" asp-action="Administered" class="nav-card">
+                <div class="nav-card-icon medication-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="nav-card-title">Medications</div>
+                <div class="nav-card-description">Administer medications and track prescription schedules</div>
+            </a>
+
+            <a asp-controller="Nurse" asp-action="InstructionList" class="nav-card">
+                <div class="nav-card-icon instructions-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="nav-card-title">Requested Instructions</div>
+                <div class="nav-card-description">View and manage patient care instructions and protocols</div>
+            </a>
+            <a asp-controller="Nurse" asp-action="Progress" class="nav-card">
+                <div class="nav-card-icon progress-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="nav-card-title">Patient Progress</div>
+                <div class="nav-card-description">See combined vitals, medications & treatments timeline</div>
+            </a>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h3>
+                <i class="bi bi-bar-chart-fill"></i>
+                Today's Overview
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Stats.TotalPatients</div>
+                    <div class="stat-label">Total Patients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Stats.TotalVitals</div>
+                    <div class="stat-label">Vitals Taken</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Stats.TreatmentsToday</div>
+                    <div class="stat-label">Treatments Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.Stats.MedicationsGivenToday</div>
+                    <div class="stat-label">Medications Given</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add ripple effect to navigation cards
+    document.querySelectorAll('.nav-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+                z-index: 10;
+            `;
+
+            this.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Update the clock every second
+    setInterval(updateClock, 1000);
+
+    // Initialize clock on page load
+    updateClock();
+</script>

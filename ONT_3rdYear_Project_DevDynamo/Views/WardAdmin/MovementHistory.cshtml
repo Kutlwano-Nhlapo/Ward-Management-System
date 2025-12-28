@@ -1,0 +1,251 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Movement>
+@{
+    ViewData["Title"] = "Patient Movement History";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="~/css/WardAdmin/MovementHistory.css" rel="stylesheet" />
+
+<div class="movement-history-container">
+    <div class="movement-history-card">
+        <!-- Header Section -->
+        <div class="movement-history-header">
+            <div class="header-content">
+                <i class="bi bi-list-check header-icon"></i>
+                <div>
+                    <h1 class="header-title">Patient Movement History</h1>
+                    <p class="header-subtitle">Tracking movements for @ViewBag.PatientName</p>
+                </div>
+            </div>
+            <a asp-action="ViewPatients" class="btn btn-outline-secondary back-btn">
+                <i class="bi bi-arrow-left"></i> Back to Patients
+            </a>
+        </div>
+
+        <!-- Patient Info Card -->
+        <div class="patient-info-card">
+            <div class="patient-info-content">
+                <div class="patient-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="patient-details">
+                    <h3 class="patient-name">@ViewBag.PatientName</h3>
+                    <div class="patient-meta">
+                        <span class="movement-count">@Model.Count() movements recorded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @* @if (TempData["SuccessMessage"] != null)
+        {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        } *@
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Movements Table -->
+        <div class="movements-table-container">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table movements-table">
+                        <thead>
+                            <tr>
+                                <th class="location-column">
+                                    <span class="th-content">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                        Movement Path
+                                    </span>
+                                </th>
+                                <th class="time-column">
+                                    <span class="th-content">
+                                        <i class="bi bi-clock"></i>
+                                        Date & Time
+                                    </span>
+                                </th>
+                                <th class="duration-column">
+                                    <span class="th-content">
+                                        <i class="bi bi-stopwatch"></i>
+                                        Duration
+                                    </span>
+                                </th>
+                                <th class="actions-column text-center">
+                                    <span class="th-content">
+                                        <i class="bi bi-gear"></i>
+                                        Actions
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var previousMovement = (Movement)null;
+                            }
+                            @foreach (var movement in Model.OrderByDescending(m => m.TimeStamp))
+                            {
+                                var duration = previousMovement != null ?
+                                (previousMovement.TimeStamp - movement.TimeStamp) : (TimeSpan?)null;
+                                previousMovement = movement;
+
+                                <tr class="movement-row">
+                                    <td class="movement-path">
+                                        <div class="from-location">
+                                            <span class="location-label">From:</span>
+                                            <span class="location-value">@movement.FromLocation</span>
+                                        </div>
+                                        <div class="movement-arrow">
+                                            <i class="bi bi-arrow-down"></i>
+                                        </div>
+                                        <div class="to-location">
+                                            <span class="location-label">To:</span>
+                                            <span class="location-value">@movement.ToLocation</span>
+                                        </div>
+                                    </td>
+                                    <td class="movement-time">
+                                        <div class="date">@movement.TimeStamp.ToString("dd MMM yyyy")</div>
+                                        <div class="time">@movement.TimeStamp.ToString("HH:mm")</div>
+                                    </td>
+                                    <td class="movement-duration">
+                                        @if (duration.HasValue && duration.Value.TotalHours < 24)
+                                        {
+                                            <span class="duration-badge">
+                                                @if (duration.Value.Hours > 0)
+                                                {
+                                                    <text>@duration.Value.Hours h </text>
+                                                }
+                                                @if (duration.Value.Minutes > 0)
+                                                {
+                                                    <text>@duration.Value.Minutes m</text>
+                                                }
+                                                else
+                                                {
+                                                    <text>Less than 1m</text>
+                                                }
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="action-buttons">
+                                            <a asp-action="EditMovement" asp-route-id="@movement.MovementID"
+                                               class="btn btn-sm btn-outline-warning" title="Edit Movement">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="LogMovement" asp-route-patientId="@movement.PatientID"
+                                               class="btn btn-sm btn-outline-primary" title="Log New Movement">
+                                                <i class="bi bi-plus-circle"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h4>No Movement History</h4>
+                    <p>No movements have been recorded for this patient yet.</p>
+                    <a asp-action="LogMovement" asp-route-patientId="@ViewBag.PatientID"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Log First Movement
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Statistics Section -->
+        @if (Model.Any())
+        {
+            <div class="statistics-section">
+                <h4 class="stats-title">Movement Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">@Model.Count()</div>
+                        <div class="stat-label">Total Movements</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">@Model.Select(m => m.ToLocation).Distinct().Count()</div>
+                        <div class="stat-label">Unique Locations</div>
+                    </div>
+                    @{
+                        var firstMovement = Model.OrderBy(m => m.TimeStamp).FirstOrDefault();
+                        var lastMovement = Model.OrderByDescending(m => m.TimeStamp).FirstOrDefault();
+                        var totalDuration = lastMovement != null && firstMovement != null ?
+                        (lastMovement.TimeStamp - firstMovement.TimeStamp) : TimeSpan.Zero;
+                    }
+                    <div class="stat-card">
+                        <div class="stat-number">@totalDuration.Days</div>
+                        <div class="stat-label">Days Tracked</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation to table rows
+            const tableRows = document.querySelectorAll('.movement-row');
+            tableRows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.1}s`;
+                row.classList.add('fade-in');
+            });
+
+            // Add hover effects
+            const movementRows = document.querySelectorAll('.movement-row');
+            movementRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        });
+    </script>
+}

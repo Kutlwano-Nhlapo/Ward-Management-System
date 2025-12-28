@@ -1,0 +1,211 @@
+@model IEnumerable<ONT_3rdyear_Project.Models.Order>
+@{
+    ViewData["Title"] = "List of Orders";
+   
+}
+<head>
+    <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+</head>
+ 
+@* Orders Management Page - Professional Design *@
+
+
+<div class="dashboard-wrapper">
+    <div class="container px-4">
+        @* Page Header *@
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+           
+                     <h1><i class="bi bi-clock-history"></i>Pending Order Requests</h1>
+                
+                <div class="d-flex gap-2">
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("ConsumableManager"))
+                    {
+                        <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                            <i class="bi bi-arrow-left"></i>
+                            Back
+                        </a>
+                    }
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Dashboard" class="back-button">
+                            <i class="bi bi-arrow-left"></i>
+                            Back
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Orders Table *@
+        <div class="orders-table-wrapper">           
+            <div class="table-responsive">
+                <table class="table orders-table mb-0">                 
+                    <thead>
+                        <tr>                           
+                            <th scope="col">Ward</th>                           
+                            <th scope="col">Approval Action</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Remarks</th>
+                            <th scope="col" class="text-center">Status</th>
+                        </tr>
+                    </thead>                
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            var pendingOrders = Model.Where(r => r.Status == "Pending" || r.Status == "New").ToList();
+                            
+                            if (!pendingOrders.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="p-0">
+                                        <div class="empty-state">
+                                            <i class="bi bi-inbox"></i>
+                                            <h4>No Pending Orders</h4>
+                                            <p>All orders have been processed. Great work!</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var order in pendingOrders)
+                                {
+                                    var items = order.ConsumableOrders.ToList();
+                                    
+                                    <tr >
+                                       
+                                        @* Ward Name *@
+                                        <td>
+                                            <span class="ward-badge">
+                                                <i class="bi bi-hospital me-1"></i>
+                                                @order.Ward.Name
+                                            </span>
+                                        </td>
+                                        
+                                        @* Consumable Items *@
+                                       
+                                        
+                                        @* Approval Form *@
+                                        <td>
+                                            <form asp-controller="Consumable" asp-action="ApproveRequest" method="post" class="approval-form">
+                                                <input type="hidden" name="RequestId" value="@order.OrderID" />
+                                                
+                                                @for (int i = 0; i < items.Count; i++)
+                                                {    <div class="d-flex flex-column align-items-end">
+                                                        <h4 class="consumable-reason mb-1 d-flex align-items-center">
+                                                            <i class="bi bi-chat-left-text me-1"> <strong>Reason: </strong></i>@items[i].Reason
+                                                        </h4>
+                                                    </div>
+                                                    <div class="approval-item">
+                                                        <label class="form-label">                                                            
+                                                          <ul class="consumable-list">
+                                                            <li class="">
+                                                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                                                    <span class="consumable-name">@items[i].Consumable.Name</span>
+                                                                    <span class="consumable-qty">
+                                                                       <i class="bi bi-box-seam me-1"> ReqQty:</i>@items[i].QuantityRequested
+                                                                    </span>
+                                                                   
+                                                                </div>
+                                                               
+                                                            </li>
+                                                            </ul>
+                                                        </label>
+                                                        
+                                                        <input asp-for="@items[i].QuantityApproved"
+                                                               class="form-control form-control-sm"
+                                                               value="@items[i].QuantityRequested"
+                                                               min="0" 
+                                                               type="number"
+                                                               placeholder="Enter approved quantity" />
+                                                        
+                                                        <input type="hidden" asp-for="@items[i].OrderId" />
+                                                        <input type="hidden" asp-for="@items[i].ConsumableId" />
+                                                    </div>
+                                                }
+                                                
+                                                <div class="action-buttons">
+                                                    <button type="submit" name="type" value="0" class="btn btn-success flex-fill">
+                                                        <i class="bi bi-check-circle me-1"></i>
+                                                        Approve All
+                                                    </button>
+                                                    <button type="submit" name="type" value="1" class="btn btn-danger flex-fill">
+                                                        <i class="bi bi-x-circle me-1"></i>
+                                                        Reject All
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                        
+                                        @* Order Date *@
+                                        <td>
+                                            <span class="date-badge">
+                                                <i class="bi bi-calendar3 me-1"></i>
+                                                @order.OrderDate.ToString("MMM dd, yyyy")
+                                            </span>
+                                        </td>
+                                        
+                                        @* Remarks *@
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(order.Remark))
+                                            {
+                                                <span class="remarks-text">@order.Remark</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">—</span>
+                                            }
+                                        </td>
+                                        
+                                        @* Status Badge *@
+                                        <td>
+                                            @switch (order.Status)
+                                            {
+                                                case "Pending":
+                                                case "New":
+                                                    <span class="status-badge status-pending">                                                      
+                                                        @order.Status
+                                                    </span>
+                                                    break;
+                                                case "Approved":
+                                                    <span class="status-badge status-approved">                                                      
+                                                        @order.Status
+                                                    </span>
+                                                    break;
+                                                case "Rejected":
+                                                    <span class="status-badge bg-danger text-white">
+                                                        <i class="bi bi-x-circle-fill"></i>
+                                                        @order.Status
+                                                    </span>
+                                                    break;
+                                                default:
+                                                    <span class="status-badge status-rejected">
+                                                        @order.Status
+                                                    </span>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr  >
+                                    
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="p-0">
+                                    <div class="empty-state">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        <h4>No Orders Found</h4>
+                                        <p>There are currently no orders in the system.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

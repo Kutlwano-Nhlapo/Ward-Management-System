@@ -1,0 +1,35 @@
+﻿@model ONT_3rdyear_Project.Models.Patient
+<div>
+    <strong>Name:</strong> @Model?.FirstName @Model?.LastName <br />
+    <strong>Gender:</strong> @Model?.Gender <br />
+    <strong>Date of birth:</strong> @Model?.DateOfBirth.ToShortDateString() <br />
+
+    <strong>Status:</strong>
+    @if (Model != null && Model.Admitted)
+    {
+        <span>Admitted</span>
+    }
+    else
+    {
+        <span>Not admitted</span>
+    }
+    <br />
+
+    @if (Model != null && Model.Admitted && Model.Admissions != null)
+    {
+        <strong>Ward:</strong> @Model.Admissions.Ward?.Name <br />
+        <strong>Bed:</strong> @Model.Admissions.Bed?.BedNo <br />
+        <strong>Admitted on:</strong> @Model.Admissions.AdmissionDate.ToShortDateString() <br />
+        <strong>Reason for admission:</strong> @Model.Admissions.ReasonForAdmission <br />
+        <strong>Assigned Doctor:</strong> @Model.Admissions.ApplicationUser?.FullName <br />
+        <a href="@Url.Action("Discharge", "WardAdmin", new { id = Model.PatientID })" class="btn btn-danger">
+            Discharge Patient
+        </a>
+    }
+    else if (Model != null && !Model.Admitted)
+    {
+        <a href="@Url.Action("AdmitPatientStep1", "WardAdmin", new { id = Model.PatientID })" class="btn btn-primary">
+            Admit Patient
+        </a>
+    }
+</div>

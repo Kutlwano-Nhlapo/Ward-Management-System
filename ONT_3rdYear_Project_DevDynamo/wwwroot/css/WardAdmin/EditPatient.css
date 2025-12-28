@@ -1,0 +1,234 @@
+﻿.edit-patient-content {
+    padding: 24px;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.patient-preview-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.preview-avatar {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.preview-info {
+    flex: 1;
+}
+
+.current-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.patient-meta {
+    display: flex;
+    gap: 16px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.admission-status {
+    flex-shrink: 0;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .status-badge.admitted {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-badge.available {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+.form-section {
+    margin-bottom: 24px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.section-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+    .form-label.required::after {
+        content: "*";
+        color: #ef4444;
+        margin-left: 4px;
+    }
+
+.form-control,
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+.age-display {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.form-help {
+    margin-top: 6px;
+}
+
+    .form-help small {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+.info-note {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: start;
+}
+
+    .info-note i {
+        color: #3b82f6;
+        font-size: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .info-note strong {
+        color: #1e40af;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .info-note p {
+        color: #1e40af;
+        font-size: 13px;
+    }
+
+#editAlertContainer {
+    margin-bottom: 20px;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+    .modal-footer .btn {
+        padding: 10px 24px;
+        font-weight: 500;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+.btn-success {
+    background: #22c55e;
+    border: none;
+}
+
+    .btn-success:hover {
+        background: #16a34a;
+    }
+
+    .btn-success:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+@media (max-width: 768px) {
+    .patient-preview-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .edit-patient-content {
+        padding: 16px;
+    }
+
+    .patient-meta {
+        flex-direction: column;
+        gap: 4px;
+    }
+}

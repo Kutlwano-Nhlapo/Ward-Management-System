@@ -1,0 +1,870 @@
+﻿@* 
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0 text-nowrap"><a asp-controller="Admin" asp-action="Dashboard" class="text-decoration-none text-dark">Administrator Dashboard</a></h1>
+                <div class="btn-group gap-2">
+                
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Alert Cards -->
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a asp-controller="Admin" asp-action="Employees" class="text-decoration-none text-dark">
+            <div class="card ">
+                <div class="card-body text-center">
+                    <h5 class="card-title ">
+                        <i class="bi bi-people-fill"></i> Total Staff
+                    </h5>
+                    <h4 class="">@ViewBag.TotalStaff</h4>
+                    <p class="card-text">Total Active Employees</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <div class="card ">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="bi bi-capsule"></i> Medication Stock
+                </h5>
+                <h2 class="">@ViewBag.MedicationCount</h2>
+                <p class="card-text">Total Medication managed</p>
+            </div>
+        </div>
+    </div>   
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="bi bi-hospital"></i> Total Wards
+                </h5>
+                <h2 class="">@ViewBag.WardCount</h2>
+                <p class="card-text">Total Hospital Wards</p>
+            </div>
+        </div>
+    </div>
+     <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">
+                    <i class="bi bi-person-fill"></i> Total Beds
+                </h5>
+                <h2 class="">@ViewBag.WardCount</h2>
+                <p class="card-text">Total Beds Wards</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">                     
+                        <a asp-controller="Consumable" asp-action="ListOfOrders" class="btn btn-secondary mb-2 text-nowrap">View Requests</a>
+                        <a asp-controller="Consumable" asp-action="FullInventory" class="btn btn-secondary mb-2 text-nowrap"><i class="fas fa-chart-bar"></i> Full Inventory</a>
+                        <a class="btn btn-outline-success btn-block mb-2" asp-area="" asp-controller="Consumable" asp-action="Index">Consumables</a>
+                        <a class="btn btn-outline-success btn-block mb-2" asp-area="" asp-controller="Consumable" asp-action="Wards">Wards</a>
+                        <a class="btn btn-outline-success btn-block mb-2" asp-area="" asp-controller="Admin" asp-action="Employees">Employees</a>
+                        <a class="btn btn-outline-success btn-block mb-2" asp-area="" asp-controller="Admin" asp-action="Allergies">Allergies</a>
+                            <a class="btn btn-outline-success btn-block mb-2" asp-area="" asp-controller="Admin" asp-action="ListMedication">Medications</a>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+@model ONT_3rdyear_Project.AdminViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="/css/Admin/AdminStyles.css" rel="stylesheet" />
+
+
+<style>
+    /* CSS Variables for Admin Dashboard */
+    :root {
+        --primary-purple: #667eea;
+        --primary-dark: #764ba2;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-admin: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr2.jpg);
+        background-size: contain; /* Shows entire image */
+        background-position: center center;
+        background-size: cover;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        position: relative;
+        padding-bottom: 2rem;
+    }
+
+
+
+    /* Floating background elements */
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .floating-element {
+        position: absolute;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 70%;
+            right: 10%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-delay: 4s;
+        }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+            opacity: 0.7;
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+            opacity: 0.3;
+        }
+    }
+
+    .dashboard-container {
+        position: relative;
+        z-index: 1;
+        padding: 2rem 0;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 1rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 0 2rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 100px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .admin-photo-frame {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid var(--primary-purple);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        animation: float-gentle 3s ease-in-out infinite;
+        flex-shrink: 0;
+        background: #99ddff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .admin-photo-frame i {
+            font-size: 3rem;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-photo-frame:hover i {
+            transform: scale(1.1);
+        }
+
+    .photo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        pointer-events: none;
+    }
+
+    @@keyframes float-gentle {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(1deg);
+        }
+    }
+
+    .dashboard-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-right {
+        text-align: right;
+    }
+
+    .time-display {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-purple);
+        background: var(--primary-light);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+
+        .time-display i {
+            margin-right: 0.5rem;
+        }
+
+    /* Navigation Grid */
+    .navigation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin: 0 2rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .nav-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        min-height: 280px;
+    }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .nav-card:hover::before {
+            left: 100%;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: inherit;
+            border-color: var(--primary-purple);
+        }
+
+    .nav-card-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .nav-card:hover .nav-card-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* Icon Gradient Styles - Admin Theme */
+    .reports-icon {
+        background: #99ddff;
+    }
+
+    .staff-icon {
+        background: #99ddff;
+    }
+
+    .beds-icon {
+        background: #99ddff;
+    }
+
+    .medication-icon {
+        background: #99ddff;
+    }
+
+    .allergy-icon {
+        background: #99ddff;
+    }
+
+    .wards-icon {
+        background: #99ddff;
+    }
+
+    .consumables-icon {
+        background: #99ddff;
+    }
+
+    /* Enhanced Text Styling */
+    .nav-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .nav-card-description {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        max-width: 90%;
+    }
+
+    /* Statistics Section */
+    .stats-section {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        margin: 0 2rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .stats-section h3 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .stats-section h3 i {
+                color: var(--primary-purple);
+            }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: #99ddff;
+        color: white;
+        /*  padding: 2rem 1.5rem; */
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.95;
+    }
+
+    /* Animation for cards */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .nav-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+
+        .nav-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .nav-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .nav-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .nav-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .nav-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .nav-card:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        .nav-card:nth-child(7) {
+            animation-delay: 0.7s;
+        }
+
+    .stat-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.8s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.85s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.9s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.95s;
+        }
+
+        .stat-card:nth-child(5) {
+            animation-delay: 1s;
+        }
+
+        .stat-card:nth-child(6) {
+            animation-delay: 1.05s;
+        }
+
+        .stat-card:nth-child(7) {
+            animation-delay: 1.1s;
+        }
+
+        .stat-card:nth-child(8) {
+            animation-delay: 1.15s;
+        }
+
+    /* Responsive Design - Tablet */
+    @@media (max-width: 1200px) {
+        .navigation-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 0 1.5rem 2rem;
+        }
+    }
+
+    /* Responsive Design - Mobile */
+    @@media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            text-align: center;
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .header-left {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+        }
+
+        .admin-photo-frame {
+            width: 80px;
+            height: 80px;
+        }
+
+            .admin-photo-frame i {
+                font-size: 2.5rem;
+            }
+
+        .time-display {
+            font-size: 1.2rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .navigation-grid {
+            grid-template-columns: 1fr;
+            margin: 0 1rem 1.5rem;
+            gap: 1.25rem;
+        }
+
+        .nav-card {
+            padding: 2rem 1.5rem;
+            min-height: 240px;
+        }
+
+        .nav-card-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+        }
+
+        .nav-card-title {
+            font-size: 1.3rem;
+        }
+
+        .nav-card-description {
+            font-size: 0.9rem;
+        }
+
+        .stats-section {
+            margin: 0 0.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1.5rem 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .dashboard-container {
+            padding: 1rem 0;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .navigation-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 0 0.75rem 1rem;
+        }
+
+        .nav-card {
+            padding: 1.75rem 1.25rem;
+            min-height: 220px;
+        }
+    }
+
+    /* Ripple effect */
+    .nav-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    @@keyframes ripple {
+        to {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+</style>
+<div class="dashboard-wrapper">
+    <!-- Floating background elements -->
+
+
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <div class="admin-photo-frame">
+                    <i class="fas fa-user-shield"></i>
+                    <div class="photo-overlay"></div>
+                </div>
+                <h1 class="dashboard-title">Healthcare Admin Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="time-display">
+                    <i class="bi bi-clock"></i>
+                    <span id="current-time"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Navigation Cards -->
+        <div class="navigation-grid" id="mainNavigation">
+            <a asp-action="MedicationStock" class="nav-card">
+                <div class="nav-card-icon reports-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="nav-card-title">Reports & Analytics</div>
+                <div class="nav-card-description">Access comprehensive facility reports and performance analytics</div>
+            </a>
+
+            <a asp-action="Employees" class="nav-card">
+                <div class="nav-card-icon staff-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="nav-card-title">Staff & Personnel</div>
+                <div class="nav-card-description">Oversee employee records and staff management operations</div>
+            </a>
+
+            <a asp-action="Beds" class="nav-card">
+                <div class="nav-card-icon beds-icon">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="nav-card-title">Bed Management</div>
+                <div class="nav-card-description">Monitor and manage bed allocation across all facility wards</div>
+            </a>
+
+            <a asp-action="ListMedication" class="nav-card">
+                <div class="nav-card-icon medication-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="nav-card-title">Medication Inventory</div>
+                <div class="nav-card-description">Manage pharmaceutical inventory and medication tracking</div>
+            </a>
+
+            <a asp-action="Allergies" class="nav-card">
+                <div class="nav-card-icon allergy-icon">
+                    <i class="fas fa-shield-virus"></i>
+                </div>
+                <div class="nav-card-title">Allergy Management</div>
+                <div class="nav-card-description">Maintain and update patient allergy records and protocols</div>
+            </a>
+
+            <a asp-action="Wards" class="nav-card">
+                <div class="nav-card-icon wards-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="nav-card-title">Ward Administration</div>
+                <div class="nav-card-description">Oversee ward operations and departmental management</div>
+            </a>
+
+            <a asp-controller="Consumable" asp-action="Index" " class="nav-card">
+                <div class="nav-card-icon consumables-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="nav-card-title">Consumables</div>
+                <div class="nav-card-description">Track and manage medical supplies and consumable inventory</div>
+            </a>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h3>
+                <i class="bi bi-bar-chart-fill"></i>
+                Facility Overview
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalBeds</div>
+                    <div class="stat-label">Total Beds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.AvailableBeds</div>
+                    <div class="stat-label">Available Beds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.OccupiedBeds</div>
+                    <div class="stat-label">Occupied Beds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalEmployees</div>
+                    <div class="stat-label">Total Employees</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalWards</div>
+                    <div class="stat-label">Total Wards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalMedications</div>
+                    <div class="stat-label">Medications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalAllergies</div>
+                    <div class="stat-label">Allergies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">@Model.TotalConsumables</div>
+                    <div class="stat-label">Consumables</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add ripple effect to navigation cards
+    document.querySelectorAll('.nav-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(102, 126, 234, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+                z-index: 10;
+            `;
+
+            this.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Update the clock every second
+    setInterval(updateClock, 1000);
+
+    // Initialize clock on page load
+    updateClock();
+</script>

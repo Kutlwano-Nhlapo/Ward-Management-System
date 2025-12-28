@@ -1,0 +1,639 @@
+﻿@model ONT_3rdyear_Project.Models.Instruction
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "View Doctor Advice";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+
+    var isNurse = roles.Contains("Nurse") || roles.Contains("Sister");
+
+    // Check if there's actual advice
+    var hasActualAdvice = !string.IsNullOrWhiteSpace(Model.Instructions) &&
+                         Model.Instructions != "No advice from doctor";
+
+    // Generate a unique code that includes advice content hash
+    var adviceHash = hasActualAdvice ? Model.Instructions.GetHashCode().ToString() : "no_advice";
+    var instructionKey = $"patient_{Model.PatientID}_advice_{adviceHash}";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    /* CSS Variables matching Vitals.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: relative;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 2rem;
+    }
+
+    /* Header Styles matching Vitals */
+    .patients-header {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        z-index: 1;
+        margin-top: 5px;
+        max-width: 1340px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--primary-blue);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s ease;
+    }
+
+        .breadcrumb-link:hover {
+            color: var(--secondary-teal);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-link i {
+            margin-right: 0.5rem;
+        }
+
+    .breadcrumb-nav .bi-chevron-right {
+        margin: 0 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        padding: 90px 0 20px 0;
+    }
+
+        .page-title i {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        padding: 2rem 0 4rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Advice Container matching Vitals cards */
+    .advice-container {
+        background: #e6f7ff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+    }
+
+        .cards-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .cards-header h3 i {
+                color: var(--primary-blue);
+            }
+
+    /* Patient Info matching Vitals styling */
+    .patient-info {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+    }
+
+    .patient-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .patient-label i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+    .patient-name {
+        font-size: 1.4rem;
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Advice Section */
+    .advice-section {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+    }
+
+    .advice-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .advice-label i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+    .advice-text {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .no-advice {
+        color: var(--text-secondary);
+        font-style: italic;
+        text-align: center;
+        padding: 2rem;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+
+    /* Read Status Section */
+    .read-status {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-unread {
+        background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+        color: #856404;
+        border: 1px solid #ffd351;
+    }
+
+    .status-read {
+        background: linear-gradient(45deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border: 1px solid #b1dfbb;
+    }
+
+    .status-new {
+        background: linear-gradient(45deg, #cce7ff, #b3d9ff);
+        color: #004085;
+        border: 1px solid #9fcdff;
+    }
+
+    .new-advice-badge {
+        background: var(--danger-red);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .read-timestamp {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    /* Buttons matching Vitals */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #0066a6;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-success {
+        background: var(--accent-green);
+        color: white;
+    }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-success:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .action-section {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .no-advice-message {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        text-align: center;
+        color: var(--text-secondary);
+    }
+
+    /* Animation */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .advice-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .patients-content {
+            padding: 1rem 0 2rem;
+        }
+
+        .advice-container {
+            margin: 0 1rem;
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            padding: 60px 0 15px 0;
+        }
+
+        .read-status {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .patient-name {
+            font-size: 1.2rem;
+        }
+
+        .advice-text {
+            font-size: 1rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .advice-container {
+            padding: 0.75rem;
+        }
+
+        .patient-info, .advice-section, .read-status {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="patients-wrapper">
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header Section -->
+        <div class="patients-header">
+            
+                    <div class="title-section">
+                        <h1 class="page-title">
+                            <i class="fas fa-stethoscope"></i>
+                            Doctor's Instructions
+                        </h1>
+                        <p class="page-subtitle">View and manage medical advice for patient care</p>
+                    </div>
+                
+        </div>
+
+        <!-- Main Content -->
+        <div class="patients-content">
+            <div class="container">
+                <div class="advice-container">
+                    <div class="cards-header">
+                        <h3>
+                            <i class="fas fa-file-medical"></i>
+                            Medical Instructions
+                        </h3>
+                    </div>
+
+                    <!-- Replace the entire commented out read-status section with this active code -->
+                    <div class="advice-content">
+                        @if (isNurse && hasActualAdvice)
+                        {
+                            <div class="read-status">
+                                <div>
+                                    @if (Model.IsRead)
+                                    {
+                                        <span class="status-indicator status-read">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Read</span>
+                                        </span>
+                                        <div class="read-timestamp">
+                                            <i class="fas fa-clock"></i>
+                                            Read on: @Model.ReadAt?.ToString("MMM dd, yyyy hh:mm tt")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-indicator status-unread">
+                                            <i class="fas fa-circle"></i>
+                                            <span>Unread</span>
+                                            <span class="new-advice-badge">NEW</span>
+                                        </span>
+                                        <div class="read-timestamp" style="display: none;">
+                                            <i class="fas fa-clock"></i>
+                                            Read on: <span id="timestampValue"></span>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (!Model.IsRead)
+                                {
+                                    <button type="button" class="btn btn-success" id="markAsReadBtn">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Mark as Read</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-secondary" disabled>
+                                        <i class="fas fa-check-double"></i>
+                                        <span>Already Read</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else if (isNurse && !hasActualAdvice)
+                        {
+                            <div class="no-advice-message">
+                                <i class="fas fa-info-circle"></i>
+                                <span>No advice available to mark as read</span>
+                            </div>
+                        }
+
+                        <!-- Rest of your existing patient info and advice sections remain the same -->
+                        <div class="patient-info">
+                            <div class="patient-label">
+                                <i class="fas fa-user"></i>
+                                Patient Information
+                            </div>
+                            <p class="patient-name">@Model.Patient.FirstName @Model.Patient.LastName</p>
+                        </div>
+
+                        <!-- Doctor's Advice section remains unchanged -->
+                        <div class="advice-section">
+                            <div class="advice-label">
+                                <i class="fas fa-comment-medical"></i>
+                                Doctor's Advice
+                            </div>
+                            @if (string.IsNullOrWhiteSpace(Model.Instructions) || Model.Instructions == "No advice from doctor")
+                            {
+                                <p class="advice-text no-advice">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    No advice from doctor
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="advice-text">
+                                    @Model.Instructions
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                       
+
+                        <!-- Action Section -->
+                        <div class="action-section">
+                            <a asp-controller="@(roles.Contains("Nurse") ? "Nurse" : "NurseSister")" asp-action="PatientsList" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Instructions List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+               document.addEventListener('DOMContentLoaded', function() {
+            const markAsReadBtn = document.getElementById('markAsReadBtn');
+
+            if (markAsReadBtn) {
+                markAsReadBtn.addEventListener('click', function() {
+                    // Get the current patient ID from the model
+                    const patientId = @Model.PatientID;
+
+                    // Send AJAX request to mark as read
+                    fetch('/Nurse/MarkAdviceAsRead', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ patientId: patientId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI to show read status
+                            const statusIndicator = document.querySelector('.status-indicator');
+                            const newAdviceBadge = document.querySelector('.new-advice-badge');
+                            const readTimestamp = document.querySelector('.read-timestamp');
+
+                            // Change to read styling
+                            statusIndicator.className = 'status-indicator status-read';
+                            statusIndicator.innerHTML = '<i class="fas fa-check-circle"></i><span>Read</span>';
+
+                            // Remove NEW badge
+                            if (newAdviceBadge) {
+                                newAdviceBadge.style.display = 'none';
+                            }
+
+                            // Show timestamp with current time
+                            const now = new Date();
+                            const timestampValue = document.getElementById('timestampValue');
+                            if (timestampValue) {
+                                timestampValue.textContent = now.toLocaleString();
+                            }
+                            if (readTimestamp) {
+                                readTimestamp.style.display = 'block';
+                            }
+
+                            // Disable the button
+                            markAsReadBtn.className = 'btn btn-secondary';
+                            markAsReadBtn.innerHTML = '<i class="fas fa-check-double"></i><span>Already Read</span>';
+                            markAsReadBtn.disabled = true;
+
+                            // Optional: Show success message
+                            console.log('Advice marked as read successfully');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error marking as read:', error);
+                    });
+                });
+            }
+        });
+    </script>
+}

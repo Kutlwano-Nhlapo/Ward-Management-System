@@ -1,0 +1,233 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Admission>
+@{
+    ViewData["Title"] = "Track Patient Movement";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="~/css/WardAdmin/ViewPatients.css" rel="stylesheet" />
+
+<div class="dashboard-wrapper">
+    <div class="dashboard-header">
+        <div class="back-navigation">
+            <a asp-action="Index" asp-controller="WardAdmin" class="btn-back">
+                <i class="bi bi-arrow-left"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+        <h1 class="dashboard-title">Patient Movement Tracking</h1>
+        <p class="dashboard-subtitle">Monitor and manage patient movements between departments and wards</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">@ViewBag.TotalAdmissions</span>
+            <span class="stat-label">Admitted Patients</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">@ViewBag.RecentMovements</span>
+            <span class="stat-label">Recent Movements</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">@ViewBag.AvailableBeds</span>
+            <span class="stat-label">Available Beds</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">@ViewBag.WardCount</span>
+            <span class="stat-label">Active Wards</span>
+        </div>
+    </div>
+
+    <div class="filter-section">
+        <div class="filter-grid">
+            <div>
+                <label for="searchInput" class="form-label">Search Patients</label>
+                <input type="text" class="filter-input" id="searchInput" placeholder="Search by patient name...">
+            </div>
+            <div>
+                <label for="wardFilter" class="form-label">Filter by Ward</label>
+                <select class="filter-input" id="wardFilter">
+                    <option value="">All Wards</option>
+                    @foreach (var ward in ViewBag.Wards)
+                    {
+                        <option value="@ward.WardID">@ward.WardName</option>
+                    }
+                </select>
+            </div>
+            <button class="filter-btn" id="filterBtn">
+                <i class="bi bi-funnel"></i> Apply Filters
+            </button>
+        </div>
+    </div>
+
+    <div class="patients-table-container">
+        <div class="table-header">
+            <h3 class="table-title">Currently Admitted Patients</h3>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table patients-table" id="patientsTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-person-circle"></i>
+                                    First Name
+                                </span>
+                            </th>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-person-circle"></i>
+                                    Last Name
+                                </span>
+                            </th>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-gender-ambiguous"></i>
+                                    Gender
+                                </span>
+                            </th>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-calendar-date"></i>
+                                    Date of Birth
+                                </span>
+                            </th>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-person-badge"></i>
+                                    Assigned Doctor
+                                </span>
+                            </th>
+                            <th>
+                                <span class="th-content">
+                                    <i class="bi bi-bed-fill"></i>
+                                    Location
+                                </span>
+                            </th>
+                            <th class="text-center">
+                                <span class="th-content">
+                                    <i class="bi bi-gear-fill"></i>
+                                    Actions
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var admission in Model)
+                        {
+                            <tr class="patient-row" data-ward-id="@admission.WardID">
+                                <td>
+                                    <div class="patient-info">
+                                        <div class="patient-avatar">
+                                            @if (admission.Patient.Gender == "Male")
+                                            {
+                                                <i class="bi bi-person-fill text-primary"></i>
+                                            }
+                                            else if (admission.Patient.Gender == "Female")
+                                            {
+                                                <i class="bi bi-person-fill text-danger"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-person-fill text-secondary"></i>
+                                            }
+                                        </div>
+                                        <div class="patient-details">
+                                            <strong>@admission.Patient.FirstName</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="patient-details">
+                                        <strong>@admission.Patient.LastName</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="gender-badge gender-@admission.Patient.Gender?.ToLower()">
+                                        @admission.Patient.Gender
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="date-info">
+                                        <span class="date">@admission.Patient.DateOfBirth.ToString("dd/MM/yyyy")</span>
+                                        <small class="age">Age: @(DateTime.Now.Year - admission.Patient.DateOfBirth.Year) years</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (admission.ApplicationUser != null)
+                                    {
+                                        <span class="doctor-badge">
+                                            <i class="bi bi-person-badge"></i>
+                                             @admission.ApplicationUser.FullName
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="location-info">
+                                        <span class="ward">Ward: @admission.Ward?.Name</span>
+                                        <small class="bed">Bed: @admission.Bed?.BedNo</small>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="action-buttons">
+                                        <!-- Log Movement Button -->
+                                        <a class="btn btn-sm btn-outline-info"
+                                           asp-action="LogMovement"
+                                           asp-route-patientId="@admission.PatientID"
+                                           title="Log Movement">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+
+                                        <!-- View Movement History -->
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           asp-action="MovementHistory"
+                                           asp-route-patientId="@admission.PatientID"
+                                           title="Movement History">
+                                            <i class="bi bi-list-check"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-person-x"></i>
+                <h4>No patients currently admitted</h4>
+                <p>There are no patients to display at this time.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const wardFilter = document.getElementById('wardFilter');
+        const filterBtn = document.getElementById('filterBtn');
+        const tableRows = document.querySelectorAll('#patientsTable tbody tr');
+
+        filterBtn.addEventListener('click', function() {
+            const searchText = searchInput.value.toLowerCase();
+            const wardValue = wardFilter.value;
+
+            tableRows.forEach(row => {
+                const firstName = row.cells[0].textContent.toLowerCase();
+                const lastName = row.cells[1].textContent.toLowerCase();
+                const wardId = row.getAttribute('data-ward-id');
+
+                const nameMatch = firstName.includes(searchText) || lastName.includes(searchText);
+                const wardMatch = !wardValue || wardId === wardValue;
+
+                row.style.display = (nameMatch && wardMatch) ? '' : 'none';
+            });
+        });
+    });
+</script>

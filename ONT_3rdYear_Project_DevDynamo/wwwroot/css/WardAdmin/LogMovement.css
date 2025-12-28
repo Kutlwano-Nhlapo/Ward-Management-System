@@ -1,0 +1,224 @@
+﻿:root {
+    --primary-blue: #0077be;
+    --primary-light: #e8f4fd;
+    --secondary-teal: #00a693;
+    --accent-green: #28a745;
+    --warning-orange: #fd7e14;
+    --danger-red: #dc3545;
+    --text-primary: #1a365d;
+    --text-secondary: #4a5568;
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    padding: 2rem 1rem;
+}
+
+.movement-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.movement-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.movement-header {
+    background: var(--gradient-medical);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.movement-header-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.movement-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.movement-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0.5rem 0 0;
+}
+
+.movement-body {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control, .form-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 119, 190, 0.1);
+    }
+
+    .form-control:read-only {
+        background-color: #f8f9fa;
+        color: var(--text-secondary);
+    }
+
+.btn-primary {
+    background: var(--gradient-medical);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+.text-danger {
+    color: var(--danger-red);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.patient-info-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.patient-info-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.patient-info-detail {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.location-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f0f7ff;
+    border-radius: 8px;
+    border: 1px dashed var(--primary-blue);
+}
+
+.arrow-icon {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+}
+
+.location-from, .location-to {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 8px;
+    background: white;
+    box-shadow: var(--shadow-light);
+}
+
+.location-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.location-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .patient-info-detail {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .location-indicator {
+        flex-direction: column;
+    }
+
+    .arrow-icon {
+        transform: rotate(90deg);
+    }
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.alert-danger {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}

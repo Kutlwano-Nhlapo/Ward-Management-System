@@ -1,0 +1,18 @@
+﻿@page
+@model EmailNotConfirmedModel
+
+<h1>Email Not Confirmed</h1>
+
+@if (!string.IsNullOrEmpty(Model.UnconfirmedEmail))
+{
+    <p>Please confirm your email: <strong>@Model.UnconfirmedEmail</strong></p>
+}
+else
+{
+    <p>Please confirm your email before you can log in.</p>
+}
+
+<p>
+    Didn't receive the confirmation email?
+    <a asp-page="./ResendEmailConfirmation">Click here to resend confirmation email</a>
+</p>

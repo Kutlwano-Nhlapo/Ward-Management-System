@@ -1,0 +1,29 @@
+﻿@model ONT_3rdyear_Project.Models.Vital
+@{
+	ViewData["Title"] = "Delete Vitals";
+}
+
+<h2>Delete Confirmation</h2>
+<p>Are you sure you want to delete the vitals for this patient?</p>
+
+<div>
+	<dl action="row">
+		<dt class="col-sm-4">Patient:</dt>
+		<dd class="col-sm-8">@Model.Patient?.FirstName @Model.Patient?.LastName</dd>
+
+		<dt class="col-sm-4">BloodPreasure:</dt>
+		<dd class="col-sm-8">@Model.BP</dd>
+
+		<dt class="col-sm-4">Sugar Level:</dt>
+		<dd class="col-sm-8">@Model.SugarLevel</dd>
+
+		<dt class="col-sm-4">Temperature: </dt>
+		<dd class="col-sm-8">@Model.Temperature</dd>
+
+		<form asp-action="DeleteVital" method="post" class="mt-3">
+			<input type="hidden" name="id" value="@Model.VitalID" />
+			<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+			<a asp-action="Vitals" class="btn-secondary btn-sm">Cancel</a>
+		</form>
+	</dl>
+</div>

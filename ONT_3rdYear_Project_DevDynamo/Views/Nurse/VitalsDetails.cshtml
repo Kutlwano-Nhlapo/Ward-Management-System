@@ -1,0 +1,45 @@
+﻿@model ONT_3rdyear_Project.Models.Vital
+
+@{
+    ViewData["Title"] = "Vitals Details";
+}
+
+<h2 class="mt-4">Vitals Details</h2>
+
+@if (Model != null)
+{
+    <div class="card p-4 shadow-sm mt-3">
+        <dl class="row">
+            <dt class="col-sm-3">Patient</dt>
+            <dd class="col-sm-9">@Model.Patient?.FirstName @Model.Patient?.LastName</dd>
+
+            <dt class="col-sm-3">Recorded By</dt>
+            <dd class="col-sm-9">@Model.User?.FullName</dd>
+
+            <dt class="col-sm-3">Blood Pressure</dt>
+            <dd class="col-sm-9">@Model.BP</dd>
+
+            <dt class="col-sm-3">Temperature (°C)</dt>
+            <dd class="col-sm-9">@Model.Temperature</dd>
+
+            <dt class="col-sm-3">Sugar Level</dt>
+            <dd class="col-sm-9">@Model.SugarLevel</dd>
+
+            <dt class="col-sm-3">Pulse</dt>
+            <dd class="col-sm-9">@Model.PulseRate</dd>
+
+           
+
+            <dt class="col-sm-3">Recorded On</dt>
+            <dd class="col-sm-9">@Model.Date.ToString("dd MMM yyyy HH:mm")</dd>
+        </dl>
+
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning mt-4">
+        No Vitals found for the selected record.
+    </div>
+}

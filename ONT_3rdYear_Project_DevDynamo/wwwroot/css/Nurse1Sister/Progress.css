@@ -1,0 +1,829 @@
+﻿/* CSS Variables matching Vitals.css */
+:root {
+    --primary-blue: #0077be;
+    --primary-light: #e8f4fd;
+    --secondary-teal: #00a693;
+    --accent-green: #28a745;
+    --warning-orange: #fd7e14;
+    --danger-red: #dc3545;
+    --text-primary: #1a365d;
+    --text-secondary: #4a5568;
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --success-color: #28a745;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+}
+
+html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.patients-wrapper {
+    min-height: 100vh;
+    background: url(/images/bcgr.webp);
+    background-size: contain;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-bottom: 2rem;
+}
+
+/* Header Styles matching Vitals */
+.patients-header {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1;
+   /* margin-top: 5px;*/
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumb-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+    .breadcrumb-link:hover {
+        color: var(--secondary-teal);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-link i {
+        margin-right: 0.5rem;
+    }
+
+.breadcrumb-nav .bi-chevron-right {
+    margin: 0 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.breadcrumb-current {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.title-section {
+    flex: 1;
+}
+
+.page-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 2rem;
+    padding: 90px 0 20px 0;
+}
+
+    .page-title i {
+        color: var(--primary-blue);
+        font-size: 1.8rem;
+    }
+
+.page-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Main Content */
+.patients-content {
+    padding: 2rem 0 4rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Filter Section matching Vitals search section */
+.filter-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .form-label i {
+        color: var(--primary-blue);
+        font-size: 0.9rem;
+    }
+
+.form-control, .form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: var(--bg-card);
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+        outline: none;
+    }
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background: #0066a6;
+        transform: translateY(-1px);
+        color: white;
+    }
+
+.btn-danger {
+    background: var(--danger-red);
+    color: white;
+}
+
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-1px);
+        color: white;
+    }
+
+/* Chart Section matching Vitals cards container */
+.chart-section {
+    margin-bottom: 2rem;
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-card {
+    background: #e6f7ff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    /*display: flex;*/
+    flex-direction: column;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+    .chart-header h3 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .chart-header h3 i {
+            color: var(--primary-blue);
+        }
+
+.chart-body {
+    padding: 1rem 0;
+    height: 450px;
+    flex: 1;
+}
+
+#progressChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Content Layout */
+.content-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    max-width: 1340px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.events-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-sidebar {
+    width: 350px;
+    flex-shrink: 0;
+}
+
+/* Events Card matching Vitals styling */
+.events-card, .info-card {
+    background: #e6f7ff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+    .card-header h5 {
+        margin: 0;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .card-header h5 i {
+            color: var(--primary-blue);
+        }
+
+.card-body {
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Table Styles matching Vitals */
+.table-scroll-container {
+    background: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+    overflow: auto;
+    flex: 1;
+    max-height: 500px;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+    .custom-table thead th {
+        background: var(--primary-light);
+        color: var(--text-primary);
+        padding: 1.25rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    .custom-table tbody td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-card);
+        transition: all 0.3s ease;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .custom-table tbody tr:hover td {
+        background: var(--primary-light);
+        transform: scale(1.001);
+    }
+
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .th-content i {
+        color: var(--primary-blue);
+    }
+
+/* Event Styling */
+.date-info strong {
+    color: var(--text-primary);
+}
+
+.event-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.event-vital {
+    background: linear-gradient(45deg, var(--danger-red), #ff6b6b);
+    color: white;
+}
+
+.event-medication {
+    background: linear-gradient(45deg, #6366f1, #818cf8);
+    color: white;
+}
+
+.event-treatment {
+    background: linear-gradient(45deg, var(--accent-green), #34d399);
+    color: white;
+}
+
+.event-detail {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-blue);
+}
+
+/* Statistics matching Vitals action buttons */
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease;
+}
+
+    .stat-item:hover {
+        transform: translateX(5px);
+    }
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.vital-icon {
+    background: linear-gradient(45deg, var(--danger-red), #ff6b6b);
+}
+
+.medication-icon {
+    background: linear-gradient(45deg, #6366f1, #818cf8);
+}
+
+.treatment-icon {
+    background: linear-gradient(45deg, var(--accent-green), #34d399);
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Sidebar Styles (same as Vitals) */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-medium);
+    border-right: 1px solid var(--border-color);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+    .sidebar.open {
+        left: 0;
+    }
+
+.sidebar-header {
+    padding: 2rem 1.5rem 1rem;
+    background: #99ddff;
+    color: white;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.nav-item {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+    .nav-item i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .nav-item.active {
+        background: var(--primary-light);
+        color: var(--primary-blue);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+.sidebar-toggle {
+    position: fixed;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    font-size: 1.2rem;
+}
+
+    .sidebar-toggle:hover {
+        background: var(--secondary-teal);
+        transform: scale(1.1);
+    }
+
+    .sidebar-toggle.open {
+        left: 300px;
+    }
+
+.sidebar-overlay {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.main-content {
+    transition: margin-left 0.3s ease;
+}
+
+    .main-content.sidebar-open {
+        margin-left: 280px;
+    }
+
+/* Scrollbar styling matching Vitals */
+.table-scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+    .table-scroll-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-scroll-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .table-scroll-container::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chart-card, .events-card, .info-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .content-layout {
+        flex-direction: column;
+    }
+
+    .info-sidebar {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .patients-header,
+    .filter-section,
+    .chart-section,
+    .content-layout {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 768px) {
+    .patients-content {
+        padding: 1rem 0 2rem;
+    }
+
+    .filter-section {
+        padding: 1rem;
+    }
+
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chart-body {
+        padding: 0.5rem 0;
+        height: 350px;
+    }
+
+    .info-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-table {
+        font-size: 0.9rem;
+    }
+
+        .custom-table thead th,
+        .custom-table tbody td {
+            padding: 1rem 0.5rem;
+        }
+
+    .event-detail {
+        font-size: 0.8rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        padding: 60px 0 15px 0;
+    }
+
+    .sidebar {
+        width: 250px;
+        left: -250px;
+    }
+
+    .sidebar-toggle.open {
+        left: 270px;
+    }
+
+    .main-content.sidebar-open {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .patients-content {
+        padding: 1rem 0 2rem;
+    }
+
+    .filter-section, .chart-card, .events-card, .info-card {
+        margin: 0 1rem 1rem 1rem;
+    }
+
+    .chart-card, .events-card, .info-card {
+        padding: 1rem;
+    }
+
+    .card-header, .chart-header {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* PDF Export Button matching Vitals */
+.pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    background: linear-gradient(45deg, var(--danger-red), #ff6b6b);
+    color: white;
+    box-shadow: var(--shadow-light);
+}
+
+    .pdf-btn:hover {
+        background: linear-gradient(45deg, #c82333, #e74c3c);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+        text-decoration: none;
+    }
+
+    .pdf-btn i {
+        font-size: 1.1rem;
+    }
+
+/* Force better PDF table rendering */
+@media print {
+    .custom-table {
+        border: 3px solid #000000 !important;
+        border-collapse: collapse !important;
+    }
+
+        .custom-table th,
+        .custom-table td {
+            border: 2px solid #333333 !important;
+            padding: 12px !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+        }
+
+        .custom-table th {
+            background-color: #f8f9fa !important;
+            font-weight: 900 !important;
+        }
+
+    .event-badge {
+        font-weight: bold !important;
+        padding: 8px 12px !important;
+        border: 2px solid !important;
+    }
+}
+@media print {
+    /* Prevent table rows from breaking across pages */
+    table {
+        page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    /* Ensure table headers repeat on each page */
+    thead {
+        display: table-header-group;
+    }
+
+    /* Ensure table footers repeat on each page */
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* Additional styling for better print appearance */
+    .custom-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+}

@@ -1,0 +1,893 @@
+﻿@model ONT_3rdyear_Project.ViewModels.RequestInstructionViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "Request Doctor Instruction";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* CSS Variables matching Vitals.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: relative;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 2rem;
+    }
+
+    /* Header Styles matching Vitals */
+    .patients-header {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        z-index: 1;
+        margin-top: 5px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--primary-blue);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s ease;
+    }
+
+        .breadcrumb-link:hover {
+            color: var(--secondary-teal);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-link i {
+            margin-right: 0.5rem;
+        }
+
+    .breadcrumb-nav .bi-chevron-right {
+        margin: 0 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        padding: 90px 0 20px 0;
+    }
+
+        .page-title i {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        /* padding: 2rem 0 4rem; */
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form Container matching Vitals cards */
+    .form-container {
+        background: #e6f7ff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+    }
+
+        .cards-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .cards-header h3 i {
+                color: var(--primary-blue);
+            }
+
+    /* Patient Info Card */
+    .patient-info-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .patient-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .patient-label i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+    .patient-name {
+        font-size: 1.4rem;
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: var(--primary-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+        .info-box i {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+            margin-top: 0.125rem;
+            flex-shrink: 0;
+        }
+
+        .info-box .info-content h4 {
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .info-box .info-content p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+    /* Form Groups */
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label-custom {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .form-label-custom i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+            width: 16px;
+            text-align: center;
+        }
+
+    .required-field::after {
+        content: " *";
+        color: var(--danger-red);
+        font-weight: bold;
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: var(--bg-card);
+        width: 100%;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+    /* Textarea Styling */
+    textarea.form-control {
+        min-height: 120px;
+        font-family: inherit;
+        line-height: 1.5;
+        resize: vertical;
+    }
+
+        textarea.form-control::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+    /* Buttons matching Vitals */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #0066a6;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    /* Action Buttons */
+    .action-buttons {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Validation Messages */
+    .text-danger {
+        color: var(--danger-red) !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .text-danger::before {
+            content: "⚠Required";
+            font-size: 0.75rem;
+        }
+
+    /* Animation */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        background: var(--bg-card);
+        box-shadow: var(--shadow-medium);
+        border-right: 1px solid var(--border-color);
+        transition: left 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+    .sidebar-header {
+        padding: 2rem 1.5rem 1rem;
+        background: var(--gradient-medical);
+        color: white;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+    }
+
+    .nav-item {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+    .sidebar-toggle {
+        position: fixed;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-medium);
+        transition: all 0.3s ease;
+        z-index: 1001;
+        font-size: 1.2rem;
+    }
+
+        .sidebar-toggle:hover {
+            background: var(--secondary-teal);
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle.open {
+            left: 300px;
+        }
+
+    .sidebar-overlay {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    .main-content {
+        transition: margin-left 0.3s ease;
+    }
+
+        .main-content.sidebar-open {
+            margin-left: 280px;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .patients-header,
+        .form-container {
+            max-width: 95%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .patients-content {
+            padding: 1rem 0 2rem;
+        }
+
+        .form-container {
+            margin: 0 1rem;
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            padding: 60px 0 15px 0;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .sidebar {
+            width: 250px;
+            left: -250px;
+        }
+
+        .sidebar-toggle.open {
+            left: 270px;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 0;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .form-container {
+            padding: 0.75rem;
+        }
+
+        .patient-info-card, .info-box {
+            padding: 1rem;
+        }
+
+        .patient-name {
+            font-size: 1.2rem;
+        }
+    }
+    /* Custom modal styling to match your theme */
+    .confirmation-modal .modal-header {
+        background: var(--gradient-medical);
+        color: white;
+        border-bottom: none;
+    }
+
+    .confirmation-modal .modal-title {
+        font-weight: 600;
+    }
+
+    .confirmation-modal .modal-body {
+        padding: 2rem;
+    }
+
+    .vital-details {
+        background: var(--primary-light);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .vital-detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0;
+    }
+
+    .vital-detail-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 140px;
+    }
+
+    .vital-detail-value {
+        color: var(--text-secondary);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .confirmation-modal .btn-confirm {
+        background: linear-gradient(135deg, var(--accent-green) 0%, #34d399 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+    }
+
+    .confirmation-modal .btn-cancel {
+        background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+    }
+</style>
+
+<div class="patients-wrapper">
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header Section -->
+        <div class="patients-header">
+            
+                    <div class="title-section">
+                        <h1 class="page-title">
+                            <i class="fas fa-user-md"></i>
+                            Request Doctor Instruction
+                        </h1>
+                        <p class="page-subtitle">Request guidance and instructions from the attending physician</p>
+                    </div>
+                
+        </div>
+
+        <!-- Main Content -->
+        <div class="patients-content">
+            <div class="container">
+                <div class="form-container">
+                    <div class="cards-header">
+                        <h3>
+                            <i class="fas fa-file-medical-alt"></i>
+                            Request Medical Instructions
+                        </h3>
+                    </div>
+
+                    <!-- Patient Info Card -->
+                    <div class="patient-info-card">
+                        <div class="patient-label">
+                            <i class="fas fa-user-injured"></i>
+                            Patient Information
+                        </div>
+                        <p class="patient-name">@Model.PatientName</p>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div class="info-content">
+                            <h4>Communication Guidelines</h4>
+                            <p>Provide clear, detailed information about the patient's condition, symptoms, or concerns. Include relevant vital signs, medication responses, or any changes in the patient's status.</p>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="instructionForm" asp-action="CreateRequest" method="post">
+                        <input type="hidden" asp-for="PatientID" />
+
+                        <!-- Message/Note -->
+                        <div class="form-group-custom">
+                            <label class="form-label-custom required-field" for="Message">
+                                <i class="fas fa-comment-medical"></i>
+                                Message or Note to Doctor
+                            </label>
+                            <textarea asp-for="Message"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="Please describe the patient's condition, any concerns, or specific questions you have. Include relevant details such as vital signs, symptoms, medication responses, or changes in patient status..."
+                                      required></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                           @*  <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Request
+                            </button> *@
+                            <button type="button" id="saveButton" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Request
+                            </button>
+                            <a href="@(Url.Action("PatientsList", roles.Contains("Nurse") ? "Nurse" : "NurseSister"))"
+                               class="btn btn-secondary cancel-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Instructions
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade confirmation-modal" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Confirm Instruction Request
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please review your instruction request before sending:</p>
+
+                <div class="vital-details">
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Patient:</span>
+                        <span class="vital-detail-value" id="modalPatientName">@Model.PatientName</span>
+                    </div>
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Message:</span>
+                        <span class="vital-detail-value" id="modalMessage"></span>
+                    </div>
+                </div>
+
+                <p class="mt-3"><strong>Are you sure you want to send this instruction request to the doctor?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>No, Go Back
+                </button>
+                <button type="button" class="btn btn-confirm" id="confirmSave">
+                    <i class="fas fa-check me-2"></i>Yes, Send Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        // Cancel button confirmation
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const message = document.querySelector('textarea[name="Message"]').value.trim();
+
+                if (message) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Discard changes?',
+                        text: "Any unsaved data will be lost.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, go back',
+                        cancelButtonText: 'Stay here'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = this.getAttribute('href');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Auto-resize textarea
+        const textarea = document.querySelector('textarea[name="Message"]');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(this.scrollHeight, 120) + 'px';
+            });
+
+            // Trigger initial resize
+            textarea.style.height = Math.max(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Form validation enhancement
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const message = document.querySelector('textarea[name="Message"]').value.trim();
+                if (!message) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Message Required',
+                        text: 'Please provide a message to the doctor.',
+                        confirmButtonColor: '#0077be'
+                    });
+                }
+            });
+        }
+
+
+                // Confirmation Modal Functionality - ADD ONLY THIS PART
+        document.addEventListener('DOMContentLoaded', function () {
+            const saveButton = document.getElementById('saveButton');
+            const confirmSaveButton = document.getElementById('confirmSave');
+            const instructionForm = document.getElementById('instructionForm');
+            const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+            // Save button click handler
+            saveButton.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Manually validate the message field
+                let allValid = true;
+
+                // Clear previous validation messages
+                document.querySelectorAll('.text-danger').forEach(span => {
+                    span.style.display = 'none';
+                });
+
+                // Validate Message
+                const messageInput = document.querySelector('textarea[name="Message"]');
+                if (!messageInput.value.trim()) {
+                    allValid = false;
+                    const validationSpan = messageInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                }
+
+                if (!allValid) {
+                    // Show error message for incomplete form
+                    Swal.fire({
+                        title: 'Message Required',
+                        text: 'Please provide a message to the doctor before sending the request.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                // If valid, populate modal with data and show it
+                populateModalWithData();
+                confirmationModal.show();
+            });
+
+            // Confirm save button handler
+            confirmSaveButton.addEventListener('click', function () {
+                // Submit the form
+                instructionForm.submit();
+            });
+
+            // Populate modal with form data
+            function populateModalWithData() {
+                const message = document.querySelector('textarea[name="Message"]').value;
+
+                // Truncate long messages for display
+                const displayMessage = message.length > 200 ?
+                    message.substring(0, 200) + '...' :
+                    message;
+
+                document.getElementById('modalMessage').textContent = displayMessage || 'No message provided';
+            }
+
+            // Hide validation message when user starts typing
+            const messageInput = document.querySelector('textarea[name="Message"]');
+            if (messageInput) {
+                messageInput.addEventListener('input', function () {
+                    const validationSpan = this.closest('.form-group-custom')?.querySelector('.text-danger');
+                    if (validationSpan && this.value.trim()) {
+                        validationSpan.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+}

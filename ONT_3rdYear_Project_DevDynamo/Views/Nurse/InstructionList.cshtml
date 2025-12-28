@@ -1,0 +1,500 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Instruction>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "Requested Doctor Instructions";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="~/css/Nurse1Sister/InstructionList.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '@TempData["SuccessMessage"]',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+}
+
+<div class="patients-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="fas fa-user-md"></i>
+                Navigation
+            </h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Vitals" class="nav-item">
+                <i class="fas fa-heartbeat"></i>
+                <span>Vitals</span>
+            </a>
+            <a asp-action="Treatments" class="nav-item">
+                <i class="fas fa-stethoscope"></i>
+                <span>Treatments</span>
+            </a>
+            <a href="@Url.Action(roles.Contains("Nurse") ? "Administered" : "ListAdministered", roles.Contains("Nurse") ? "Nurse" : "NurseSister")" class="nav-item">
+                <i class="fas fa-pills"></i>
+                <span>Medications</span>
+            </a>
+            <a asp-action="InstructionList" class="nav-item active">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Instructions</span>
+            </a>
+            <a asp-action="Progress" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Progress</span>
+            </a>
+            <a href="@Url.Action("PatientsList", roles.Contains("Nurse") ? "Nurse" : "NurseSister")" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Patients</span>
+            </a>
+            <a href="@Url.Action("Dashboard", roles.Contains("Nurse") ? "Nurse" : "NurseSister")" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+       
+
+        
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Header Section -->
+            <div class="patients-header">
+                <div class="title-section">
+                    <h1 class="page-title">
+                        <i class="fas fa-user-md"></i>
+                        Nurse Requested Instructions
+                    </h1>
+                    <p class="page-subtitle">Review and manage doctor instruction requests from nursing staff</p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="patients-content">
+                <div class="container">
+                   
+                    <!-- Search and Filter Section -->
+                    <div class="search-section">
+                        <form method="get" asp-action="InstructionList" class="search-form">
+                            <div class="row mb-3 w-100">
+                                <div class="col-md-4 position-relative">
+                                    <input type="text"
+                                           id="realTimeSearch"
+                                           name="searchPatient"
+                                           class="form-control"
+                                           placeholder="🔍 Search by patient name..."
+                                           autocomplete="off" />
+                                    <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                                        <div id="searchSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="statusFilter" class="form-control" id="statusFilter">
+                                        <option value="">All Status</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="reviewed">Reviewed</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-funnel"></i>
+                                        Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Content with side-by-side layout -->
+                    <div class="content-with-chart">
+                        <!-- Instructions Table -->
+                        <div class="patients-cards-container">
+                            <div class="cards-header">
+                                <h3>
+                                    <i class="fas fa-clipboard-list"></i>
+                                    Requested Instructions
+                                    <small id="results-count" class="text-muted" style="font-size: 0.8rem; margin-left: 0.5rem;">
+                                        (@Model.Count() records)
+                                    </small>
+                                </h3>
+                                
+                            </div>
+
+                            <div class="table-container" id="searchResults">
+                                <table class="patients-table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <span class="th-content">
+                                                    <i class="fas fa-user"></i>
+                                                    Patient Name
+                                                </span>
+                                            </th>
+                                            <th>
+                                                <span class="th-content">
+                                                    <i class="fas fa-comment-medical"></i>
+                                                    Requested Advice
+                                                </span>
+                                            </th>
+                                            <th>
+                                                <span class="th-content">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    Status
+                                                </span>
+                                            </th>
+                                            <th class="text-center">
+                                                <span class="th-content">
+                                                    <i class="fas fa-cog"></i>
+                                                    Actions
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var instruction in Model)
+                                        {
+                                            <tr class="patient-row">
+                                                <td>
+                                                    <div class="patient-info">
+                                                        <div class="patient-avatar">
+                                                            @(instruction.Patient?.FirstName?.Substring(0, 1))@(instruction.Patient?.LastName?.Substring(0, 1))
+                                                        </div>
+                                                        <div class="patient-details">
+                                                            <div class="patient-name">@instruction.Patient?.FirstName @instruction.Patient?.LastName</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="request-text" title="@instruction.NurseRequest">
+                                                        <strong>@instruction.NurseRequest</strong>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if (string.IsNullOrEmpty(instruction.Instructions))
+                                                    {
+                                                        <span class="status-badge status-pending">
+                                                            <i class="fas fa-clock"></i>
+                                                            Pending
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="status-badge status-reviewed">
+                                                            <i class="fas fa-check-circle"></i>
+                                                            Reviewed
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="action-buttons">
+                                                        @* <a asp-action="EditRequest" asp-route-id="@instruction.InstructionID" class="action-btn btn-treatment" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Request">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a> *@
+                                                        @if (string.IsNullOrEmpty(instruction.Instructions))
+                                                        {
+                                                            <!-- Pending - Allow edit -->
+                                                            <a asp-action="EditRequest" asp-route-id="@instruction.InstructionID"
+                                                               class="action-btn btn-treatment"
+                                                               data-bs-toggle="tooltip" data-bs-placement="top"
+                                                               title="Edit Request">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <!-- Reviewed - Show modal on click -->
+                                                            <button class="action-btn btn-treatment"
+                                                                    data-bs-toggle="modal" data-bs-target="#cannotEditModal"
+                                                                    title="Edit Request">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        }
+                                                        <button class="action-btn delete-btn" data-id="@instruction.InstructionID" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Request">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Chart container on the side -->
+                        <div class="chart-container">
+                            <h2>
+                                <i class="bi bi-pie-chart-fill"></i>
+                                Instruction Analytics
+                            </h2>
+                            <canvas id="instructionsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this instruction request? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                @Html.AntiForgeryToken()
+                <form id="deleteForm" asp-action="DeleteRequest" method="post">
+                    <input type="hidden" name="id" id="deleteId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cannot Edit Modal -->
+<div class="modal fade" id="cannotEditModal" tabindex="-1" aria-labelledby="cannotEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cannotEditModalLabel">
+                    <i class="fas fa-exclamation-circle text-warning"></i>
+                    Cannot Edit Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+                    <h4 class="text-warning">Request Already Reviewed</h4>
+                </div>
+                <p class="mb-0">This instruction request has already been reviewed by a doctor and cannot be modified.</p>
+                <p class="text-muted small mt-2">If changes are needed, please contact the reviewing doctor.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="fas fa-check"></i>
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mainContent = document.getElementById('mainContent');
+
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+        sidebarToggle.classList.toggle('open');
+
+        // On desktop, adjust main content margin
+        if (window.innerWidth > 768) {
+            mainContent.classList.toggle('sidebar-open');
+        }
+    });
+
+    sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+        sidebarToggle.classList.remove('open');
+        mainContent.classList.remove('sidebar-open');
+    });
+
+    // Close sidebar on window resize if mobile
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            mainContent.classList.remove('sidebar-open');
+        }
+    });
+
+    // Delete modal functionality
+    var deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+        document.getElementById('deleteId').value = id;
+    });
+
+    // Instructions Chart
+    let instructionsChart;
+
+    function initChart() {
+        const ctx = document.getElementById('instructionsChart').getContext('2d');
+
+        // Get status data from the table
+        const pendingCount = document.querySelectorAll('.status-pending').length;
+        const reviewedCount = document.querySelectorAll('.status-reviewed').length;
+
+        instructionsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Reviewed'],
+                datasets: [{
+                    data: [pendingCount, reviewedCount],
+                    backgroundColor: [
+                        '#99ddff', // Orange for pending
+                        '#3B82F6'  // Green for reviewed
+                    ],
+                    borderColor: [
+                        '#99ddff',
+                        '#3B82F6'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Instruction Status Overview',
+                        font: { size: 16, weight: 'bold' },
+                        padding: { top: 10, bottom: 20 }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+    }
+
+    function updateChart() {
+        if (instructionsChart) {
+            const pendingCount = document.querySelectorAll('.status-pending').length;
+            const reviewedCount = document.querySelectorAll('.status-reviewed').length;
+
+            instructionsChart.data.datasets[0].data = [pendingCount, reviewedCount];
+            instructionsChart.update();
+        }
+    }
+
+    // Live search functionality
+    $(document).ready(function () {
+        // Initialize chart first with existing data
+        initChart();
+
+        $('#liveSearchInput').on('input', function () {
+            var query = $(this).val().trim();
+
+            if (query.length === 0) {
+                // If search is empty, load all instructions
+                loadAllInstructions();
+            } else if (query.length >= 2) {
+                // Only search if query is at least 2 characters
+                performSearch(query);
+            }
+        });
+
+        function performSearch(query) {
+            $.ajax({
+                url: '@Url.Action("LiveSearchInstructions", roles.Contains("Nurse") ? "Nurse" : "NurseSister")',
+                type: 'GET',
+                data: { query: query },
+                success: function (result) {
+                    $('#searchResults').html(result);
+                    updateChart(); // Update chart after search
+                },
+                error: function () {
+                    console.error('Search failed');
+                }
+            });
+        }
+
+        function loadAllInstructions() {
+            $.ajax({
+                url: '@Url.Action("LiveSearchAllInstructions", roles.Contains("Nurse") ? "Nurse" : "NurseSister")',
+                type: 'GET',
+                success: function (result) {
+                    $('#searchResults').html(result);
+                    updateChart(); // Update chart after loading
+                },
+                error: function () {
+                    console.error('Failed to load all instructions');
+                }
+            });
+        }
+
+        // Only load all instructions if there are no existing instructions
+        if ($('#searchResults tr').length === 0) {
+            loadAllInstructions();
+        }
+    });
+</script>

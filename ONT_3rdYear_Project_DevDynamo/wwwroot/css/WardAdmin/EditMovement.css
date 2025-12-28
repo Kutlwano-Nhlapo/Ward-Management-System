@@ -1,0 +1,347 @@
+﻿:root {
+    --primary-blue: #0077be;
+    --primary-light: #e8f4fd;
+    --secondary-teal: #00a693;
+    --accent-green: #28a745;
+    --warning-orange: #fd7e14;
+    --danger-red: #dc3545;
+    --text-primary: #1a365d;
+    --text-secondary: #4a5568;
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+}
+
+.edit-movement-container {
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.edit-movement-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.edit-movement-header {
+    background: var(--gradient-medical);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    font-size: 2rem;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0.25rem 0 0;
+}
+
+.back-btn {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: white;
+        color: white;
+    }
+
+.patient-info-card {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.patient-info-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.patient-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #e3f2fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.patient-details {
+    flex: 1;
+}
+
+.patient-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.patient-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.patient-id, .movement-time {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.alert {
+    margin: 1.5rem 2rem 0;
+    border-radius: 8px;
+    border: none;
+}
+
+.movement-form-container {
+    padding: 2rem;
+}
+
+.movement-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f0f7ff;
+    border-radius: 12px;
+    border: 2px dashed var(--primary-blue);
+}
+
+.location-from, .location-to {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 8px;
+    background: white;
+    box-shadow: var(--shadow-light);
+}
+
+.location-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.location-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.movement-arrow {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    padding: 0 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control, .form-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 119, 190, 0.1);
+    }
+
+    .form-control:read-only {
+        background-color: #f8f9fa;
+        color: var(--text-secondary);
+    }
+
+.form-text {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.text-danger {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--gradient-medical);
+    color: white;
+}
+
+    .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+.btn-outline-secondary, .btn-outline-danger {
+    background: transparent;
+}
+
+.btn-outline-secondary {
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline-danger {
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
+}
+
+.movement-details {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 1px solid var(--border-color);
+}
+
+.details-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .edit-movement-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .patient-info-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .patient-meta {
+        justify-content: center;
+    }
+
+    .movement-form-container {
+        padding: 1.5rem;
+    }
+
+    .movement-indicator {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .movement-arrow {
+        transform: rotate(90deg);
+        padding: 1rem 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .edit-movement-container {
+        padding: 1rem;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}

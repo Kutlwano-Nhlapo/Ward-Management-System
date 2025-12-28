@@ -1,0 +1,506 @@
+﻿:root {
+    --primary-blue: #0077be;
+    --primary-light: #e8f4fd;
+    --secondary-teal: #00a693;
+    --accent-green: #28a745;
+    --warning-orange: #fd7e14;
+    --danger-red: #dc3545;
+    --text-primary: #1a365d;
+    --text-secondary: #4a5568;
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --success-color: #28a745;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+}
+
+.active-admissions-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 2rem 0;
+    position: relative;
+}
+
+    .active-admissions-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 200px;
+        background: var(--gradient-medical);
+        opacity: 0.1;
+        z-index: 0;
+    }
+
+/* Header Styles */
+.admissions-header {
+    margin-bottom: 2rem;
+}
+
+.back-button .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    margin-bottom: 1rem;
+}
+
+/* Stats Overview */
+.stats-overview {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid var(--border-color);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    background: var(--primary-light);
+    color: var(--primary-blue);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Admissions Table */
+.admissions-container {
+    background: var(--bg-card);
+    border-radius: 20px;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.admissions-header {
+    background: var(--gradient-medical);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .admissions-header h4 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+    }
+
+.admissions-body {
+    padding: 2rem;
+}
+
+/* Table Styles */
+.admissions-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0;
+}
+
+    .admissions-table th {
+        background: var(--primary-light);
+        padding: 1.25rem 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 2px solid var(--border-color);
+        text-align: left;
+    }
+
+    .admissions-table td {
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+
+    .admissions-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+        .admissions-table tbody tr:hover {
+            background: var(--primary-light);
+        }
+
+/* Patient Info */
+.patient-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.patient-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    color: var(--primary-blue);
+}
+
+.patient-details {
+    line-height: 1.4;
+}
+
+.patient-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.patient-meta {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.status-admitted {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--accent-green);
+}
+
+.status-pending {
+    background: rgba(253, 126, 20, 0.1);
+    color: var(--warning-orange);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-view {
+    background: rgba(0, 119, 190, 0.1);
+    color: var(--primary-blue);
+    border-color: rgba(0, 119, 190, 0.2);
+}
+
+    .btn-view:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+.btn-discharge {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger-red);
+    border-color: rgba(220, 53, 69, 0.2);
+}
+
+    .btn-discharge:hover {
+        background: var(--danger-red);
+        color: white;
+    }
+
+/* Alert Styles */
+.alert-container {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.alert-success {
+    background: linear-gradient(145deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background: linear-gradient(145deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-left: 4px solid var(--danger-red);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .admissions-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .admissions-body {
+        padding: 1.5rem;
+    }
+
+    .admissions-table {
+        font-size: 0.875rem;
+    }
+
+        .admissions-table th,
+        .admissions-table td {
+            padding: 1rem 0.5rem;
+        }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .action-btn {
+        justify-content: center;
+        padding: 0.375rem 0.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .admissions-header {
+        padding: 1rem 1.5rem;
+    }
+
+        .admissions-header h4 {
+            font-size: 1.25rem;
+        }
+
+    .patient-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .patient-avatar {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* Floating elements for background */
+.floating-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.floating-element {
+    position: absolute;
+    background: rgba(0, 119, 190, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+    .floating-element:nth-child(1) {
+        top: 10%;
+        left: 10%;
+        width: 80px;
+        height: 80px;
+        animation-delay: 0s;
+    }
+
+    .floating-element:nth-child(2) {
+        top: 70%;
+        right: 10%;
+        width: 60px;
+        height: 60px;
+        animation-delay: 2s;
+    }
+
+    .floating-element:nth-child(3) {
+        bottom: 20%;
+        left: 20%;
+        width: 40px;
+        height: 40px;
+        animation-delay: 4s;
+    }
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 0.3;
+    }
+}
+
+/* Animation for table rows */
+.admissions-table tbody tr {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.ward-badge {
+    background: rgba(0, 119, 190, 0.1);
+    color: var(--primary-blue);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.bed-number {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--accent-green);
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 40px;
+    display: inline-block;
+    text-align: center;
+}
+
+.doctor-badge {
+    background: rgba(108, 117, 125, 0.1);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.reason-text {
+    max-width: 200px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.empty-state {
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+@media print {
+    .back-button, .stats-overview, .action-buttons, .floating-elements {
+        display: none !important;
+    }
+
+    .active-admissions-wrapper {
+        background: white !important;
+    }
+
+    .admissions-container {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}

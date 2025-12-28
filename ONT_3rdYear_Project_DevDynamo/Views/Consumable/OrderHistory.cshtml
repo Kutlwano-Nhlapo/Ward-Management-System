@@ -1,0 +1,153 @@
+@model IEnumerable<ONT_3rdyear_Project.Models.Order>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+<head>
+    <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+
+<div class="dashboard-wrapper">
+    <div class="container">
+         <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">           
+                <h1><i class="bi bi-clock-history"></i>Order History</h1>                
+                <div class="d-flex gap-2">                   
+                        <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                            <i class="bi bi-arrow-left"></i>
+                            Back
+                        </a>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            var displayedOrders = Model.Where(r => r.Status == "Approved" || r.Status == "Delivered" || r.Status == "Rejected").ToList();
+            
+            @if (displayedOrders.Any())
+            {
+            <div class="orders-table-wrapper table-container">           
+                <div class="table-responsive">
+                    <table class="table orders-table mb-0">    
+                            <thead>
+                                <tr>
+                                    <th>Ward</th>
+                                    <th>Date</th>
+                                    <th>Requested By</th>
+                                    <th>Consumables</th>
+                                    <th>Supplier</th>
+                                    <th>Remarks</th>
+                                    <th style="text-align: center;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var req in displayedOrders)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="ward-badge">@req.Ward.Name</span>
+                                        </td>
+                                        <td>
+                                            <span class="order-date">@req.OrderDate.ToString("MMM dd, yyyy")</span>
+                                        </td>
+                                        <td>
+                                            <span class="user-name">@req.User.FullName</span>
+                                        </td>
+                                        <td>
+                                            <ul class="consumable-list">
+                                                @foreach (var item in req.ConsumableOrders)
+                                                {
+                                                    <li>
+                                                      
+                                                        <span class="consumable-name">@item.Consumable?.Name</span>
+                                                        <span class="consumable-quantity">
+                                                            @if (req.Status == "Delivered")
+                                                            {                                                             
+                                               
+                                                                 <span class="consumable-qty "><i class="bi bi-box-seam me-1 text-dark"> <small>Requested: @item.QuantityRequested</small></i> Approved: @(item.QuantityApproved)<i class="bi bi-arrow-down-short"></i></span>
+                                            
+                                                            }
+                                                            else
+                                                            {
+                                                                <span><span class="quantity-label">Requested:</span> @item.QuantityRequested</span>
+                                                            }
+                                                        </span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            @if (req.Supplier != null)
+                                            {
+                                                <span class="supplier-badge">@req.Supplier.SupplierName</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="no-supplier">No supplier assigned</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(req.Remark))
+                                            {
+                                                <div class="remarks-text">@req.Remark</div>
+                                            }
+                                            else
+                                            {
+                                                <span class="no-remarks">No remarks</span>
+                                            }
+                                        </td>
+                                        <td class="status-cell">
+                                            @if (req.Status == "Delivered")
+                                            {
+                                                <span class="status-badge status-delivered">@req.Status</span>
+                                            }
+                                            else if (req.Status == "Rejected")
+                                            {
+                                                <span class="status-badge status-rejected">@req.Status</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge status-approved">@req.Status</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="table-footer">
+                            Showing @displayedOrders.Count order(s)
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state-container">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">No Order History</h3>
+                    <p class="empty-description">There are no completed orders to display at this time.</p>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state-container">
+                <div class="empty-icon">
+                    <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/>
+                    </svg>
+                </div>
+                <h3 class="empty-title">No Order History</h3>
+                <p class="empty-description">There are no completed orders to display at this time.</p>
+            </div>
+        }
+    </div>
+</div>

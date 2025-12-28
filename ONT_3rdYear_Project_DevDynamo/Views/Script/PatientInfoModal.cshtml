@@ -1,0 +1,161 @@
+@model ONT_3rdyear_Project.ViewModels.ViewScriptsViewModel
+@{
+    ViewData["Title"] = "Prescription";
+}
+
+
+
+<div class="modal-header">
+     <h4 class="modal-title d-flex align-items-center mb-0">
+            <i class="fas fa-file-prescription me-2"></i>
+            <span>Prescription Details</span>
+        </h4>
+    <button type="button" class="btn-close btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <!-- Patient + Prescription Info -->
+    <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title d-flex align-items-center mb-4">
+                            <span class="card-title-icon">👤</span>
+                            <span>Patient Information</span>
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">@Model.PatientName</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="info-label">Ward</div>
+                            <div class="info-value">@Model.Ward</div>
+                        </div>                       
+                       
+                    </div>
+                </div>
+            </div>
+
+        <div class="col-md-6">
+                <div class="info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title d-flex align-items-center mb-4">
+                            <span class="card-title-icon">📋</span>
+                            <span>Prescription Details</span>
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <div class="info-label">Prescribing Doctor</div>
+                            <div class="info-value">@Model.DoctorName</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="info-label">Date Issued</div>
+                            <div class="info-value">@Model.DateCreated</div>
+                        </div>
+                        
+                        <div class="mb-0">
+                            <div class="info-label">Status</div>
+                            @{
+                                var status = Model?.Status ?? "Unknown";
+                                var badgeClass = status == "Approved" ? "status-badge-sm status-delivered" :
+                                                status == "Processing" ? "status-badge-sm status-pending" :
+                                                status == "New" ? "bg-primary" :
+                                                status == "Rejected" ? "bg-danger" : "status-badge-sm status-rejected";
+                            }
+                            <span class="badge @badgeClass">@status</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+     <div class="section-divider"></div>
+
+        <!-- Medications -->
+        <div class="card info-card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title d-flex align-items-center mb-4">
+                    <span class="card-title-icon">💊</span>
+                    <span>Prescribed Medications</span>
+                </h5>
+                
+                <div class="medications-list">
+                
+                    @for (int i = 0; i < Model.medications.Count; i++)
+                    {
+                        <div class="medication-item">
+                            <span class="medication-name">@Model.medications[i]</span>
+                            <span class="medication-dosage">@Model.Dosage[i]</span>
+                            <span class="medication-schedule">Schedule @Model.Schedule[i]</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Notes -->
+    
+ <div class="section-divider"></div>
+    <!-- Hidden rejection reason -->
+    <div class="card shadow-sm border-danger d-none mt-3" id="rejectionReasonCard">             
+                  
+        <div class="card-body">
+            <h5 class="card-title text-danger mb-3">🚫 Rejection Reason</h5>
+            <form asp-controller="Script" asp-action="StatusHandling" method="post">
+                <input value="@Model.PrescriptionId" name="id" type="hidden" />
+                <input value="3" name="value" type="hidden" />
+                <textarea name="reason" class="form-control mb-3" rows="3"
+                          placeholder="Enter rejection reason..." required></textarea>
+                <button type="submit" class="btn btn-danger w-100">
+                     <i class="fas fa-check"></i> Confirm Rejection
+                </button>
+            </form>          
+        </div>
+    </div>
+</div>
+
+ <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="back-button" data-bs-dismiss="modal">
+            <i class="fas fa-arrow-left me-2"></i>Close
+        </button>
+
+        <div class="d-flex gap-2">
+            <!-- Process -->
+            <form asp-controller="Script" asp-action="StatusHandling" method="post" class="d-inline">
+                <input value="@Model.PrescriptionId" name="id" type="hidden" />
+                <input value="1" name="value" type="hidden" />
+                <button class="btn btn-process action-btn" type="submit">
+                    <i class="fas fa-cogs me-2"></i>Process
+                </button>
+            </form>
+
+            <!-- Forward -->
+            <form asp-controller="Script" asp-action="StatusHandling" method="post" class="d-inline">
+                <input value="@Model.PrescriptionId" name="id" type="hidden" />
+                <input value="2" name="value" type="hidden" />
+                <button class="btn btn-forward action-btn" type="submit">
+                    <i class="fas fa-paper-plane me-2"></i>Forward
+                </button>
+            </form>
+
+            <!-- Reject -->
+            <button type="button" class="btn btn-reject action-btn" id="rejectBtn">
+                <i class="fas fa-ban me-2"></i>Reject
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("rejectBtn").addEventListener("click", function () {
+        let rejectionCard = document.getElementById("rejectionReasonCard");
+        rejectionCard.classList.remove("d-none");
+        rejectionCard.classList.add("animate__animated", "animate__fadeIn"); // needs animate.css
+         rejectionCard.scrollIntoView({ behavior: "smooth", block: "end" });
+        this.style.display = "none";       
+    });
+</script>

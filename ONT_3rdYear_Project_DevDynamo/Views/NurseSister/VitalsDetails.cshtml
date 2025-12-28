@@ -1,0 +1,276 @@
+﻿@model ONT_3rdyear_Project.Models.Vital
+@{
+    ViewData["Title"] = "Vitals Details";
+}
+
+<style>
+    .vitals-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .vitals-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .vitals-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .vitals-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+    .patient-info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .vital-item {
+        background: #f8faff;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 0 10px 10px 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .vital-item:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 40%, rgba(102, 126, 234, 0.05) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .vital-item:hover:before {
+            transform: translateX(100%);
+        }
+
+        .vital-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+    .vital-label {
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .vital-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #667eea;
+        margin: 0;
+    }
+
+    .vital-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        opacity: 0.7;
+    }
+
+    .btn-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+    .alert-custom {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        border: none;
+        border-radius: 15px;
+        color: #721c24;
+        padding: 20px;
+        font-weight: 500;
+    }
+
+    .timestamp {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #8b4513;
+        border-left-color: #ff9500;
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 2.2rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .breadcrumb-text {
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+
+<div class="vitals-container">
+    <div class="container">
+        <div class="vitals-header">
+            <h1 class="page-title">
+                <i class="fas fa-heartbeat" style="color: #e74c3c; margin-right: 15px;"></i>
+                Vitals Details
+            </h1>
+            <p class="breadcrumb-text">Comprehensive patient vital signs information</p>
+        </div>
+
+        @if (Model != null)
+        {
+            <div class="vitals-card">
+                <!-- Patient Information Header -->
+                <div class="patient-info">
+                    <h3 style="margin: 0; font-size: 1.5rem;">
+                        <i class="fas fa-user-md" style="margin-right: 10px;"></i>
+                        @Model.Patient?.FirstName @Model.Patient?.LastName
+                    </h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Patient Information</p>
+                </div>
+
+                <!-- Vital Signs Grid -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="vital-item">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#e74c3c" viewBox="0 0 24 24">
+                                    <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z" />
+                                </svg>
+                                Blood Pressure
+                            </div>
+                            <p class="vital-value">@Model.BP</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="vital-item">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#f39c12" viewBox="0 0 24 24">
+                                    <path d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z" />
+                                </svg>
+                                Temperature (°C)
+                            </div>
+                            <p class="vital-value">@Model.Temperature°C</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="vital-item">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#3498db" viewBox="0 0 24 24">
+                                    <path d="M12,3A3,3 0 0,1 15,6V8.17C16.78,9.47 18,11.61 18,14C18,17.31 15.31,20 12,20C8.69,20 6,17.31 6,14C6,11.61 7.22,9.47 9,8.17V6A3,3 0 0,1 12,3M12,5A1,1 0 0,0 11,6V8.5L10.5,8.77C9.08,9.54 8,11 8,14C8,16.21 9.79,18 12,18C14.21,18 16,16.21 16,14C16,11 14.92,9.54 13.5,8.77L13,8.5V6A1,1 0 0,0 12,5Z" />
+                                </svg>
+                                Sugar Level
+                            </div>
+                            <p class="vital-value">@Model.SugarLevel</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="vital-item">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#e74c3c" viewBox="0 0 24 24">
+                                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M17,13H11V7H12.5V11.5H17V13Z" />
+                                </svg>
+                                Pulse Rate
+                            </div>
+                            <p class="vital-value">@Model.PulseRate BPM</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="vital-item">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#9b59b6" viewBox="0 0 24 24">
+                                    <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L16,14.33L15.28,15.54L11,13V7H12.5Z" />
+                                </svg>
+                                Recorded By
+                            </div>
+                            <p class="vital-value">@Model.User?.FullName</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="vital-item timestamp">
+                            <div class="vital-label">
+                                <svg class="vital-icon" fill="#ff9500" viewBox="0 0 24 24">
+                                    <path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z" />
+                                </svg>
+                                Recorded On
+                            </div>
+                            <p class="vital-value">@Model.Date.ToString("dd MMM yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4">
+                    <a asp-action="Index" class="btn btn-custom">
+                        <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="vitals-card">
+                <div class="alert alert-custom text-center">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 15px; display: block;"></i>
+                    <h4>No Vitals Found</h4>
+                    <p>No vitals data found for the selected record. Please check your selection and try again.</p>
+                    <a asp-action="Index" class="btn btn-custom mt-3">
+                        <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

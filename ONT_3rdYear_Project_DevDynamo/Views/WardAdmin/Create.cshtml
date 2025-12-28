@@ -1,0 +1,302 @@
+﻿@model ONT_3rdyear_Project.Models.Patient
+@{
+    ViewData["Title"] = "Add New Patient";
+}
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/css/WardAdmin/CreatePatient.css" rel="stylesheet" asp-append-version="true">
+
+
+<div class="form-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="form-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="breadcrumb-nav">
+                    <a href="@Url.Action("Index", "WardAdmin")" class="breadcrumb-link">
+                        <i class="bi bi-house-door"></i>
+                        Dashboard
+                    </a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span class="breadcrumb-current">Add New Patient</span>
+                </div>
+                <h1 class="page-title">
+                    <i class="bi bi-person-plus-fill"></i>
+                    Patient Registration
+                </h1>
+                <p class="page-subtitle">Register a new patient in the ward management system</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-container">
+            <div class="container">
+                <div class="alert alert-success">
+                    <div class="alert-content">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <div class="alert-text">
+                            <strong>Success!</strong>
+                            <p>@TempData["SuccessMessage"]</p>
+                        </div>
+                    </div>
+                    <button type="button" class="alert-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Main Form Container -->
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10">
+                    <div class="patient-registration-card">
+                        <!-- Form Progress Indicator -->
+                        <div class="progress-indicator">
+                            <div class="progress-step active">
+                                <div class="step-number">1</div>
+                                <span class="step-label">Patient Information</span>
+                            </div>
+                        </div>
+
+                        <!-- Form Content -->
+                        <div class="form-content">
+                            <form asp-action="Create" method="post" id="patientForm" novalidate>
+                                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                                <!-- Personal Information Section -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <i class="bi bi-person-circle"></i>
+                                        <h3>Personal Information</h3>
+                                    </div>
+
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="FirstName" class="form-label required">
+                                                    <i class="bi bi-person"></i>
+                                                    First Name
+                                                </label>
+                                                <input asp-for="FirstName"
+                                                       class="form-control"
+                                                       placeholder="Enter first name"
+                                                       autocomplete="given-name" />
+                                                <span asp-validation-for="FirstName" class="field-validation"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="LastName" class="form-label required">
+                                                    <i class="bi bi-person"></i>
+                                                    Last Name
+                                                </label>
+                                                <input asp-for="LastName"
+                                                       class="form-control"
+                                                       placeholder="Enter last name"
+                                                       autocomplete="family-name" />
+                                                <span asp-validation-for="LastName" class="field-validation"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Gender" class="form-label required">
+                                                    <i class="bi bi-gender-ambiguous"></i>
+                                                    Gender
+                                                </label>
+                                                <select asp-for="Gender" class="form-select">
+                                                    <option value="">Select gender</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                                <span asp-validation-for="Gender" class="field-validation"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="DateOfBirth" class="form-label required">
+                                                    <i class="bi bi-calendar-date"></i>
+                                                    Date of Birth
+                                                </label>
+                                                <input asp-for="DateOfBirth"
+                                                       type="date"
+                                                       class="form-control"
+                                                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                                <span asp-validation-for="DateOfBirth" class="field-validation"></span>
+                                                <small class="form-helper">Patient's age will be calculated automatically</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Medical Information Section -->
+                                <div class="form-section">
+                                    <div class="section-header">
+                                        <i class="bi bi-heart-pulse"></i>
+                                        <h3>Medical Information</h3>
+                                    </div>
+
+                                    <div class="row g-4">
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label asp-for="ChronicIllness" class="form-label">
+                                                    <i class="bi bi-clipboard-data"></i>
+                                                    Chronic Conditions
+                                                </label>
+                                                <textarea asp-for="ChronicIllness"
+                                                          class="form-control"
+                                                          rows="3"
+                                                          placeholder="Enter any chronic conditions or medications. Type 'None' if not applicable."></textarea>
+                                                <span asp-validation-for="ChronicIllness" class="field-validation"></span>
+                                                <small class="form-helper">
+                                                    <i class="bi bi-info-circle"></i>
+                                                    Include ongoing medical conditions, regular medications, or known allergies
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="form-actions">
+                                    <div class="actions-left">
+                                        <a href="@Url.Action("Index", "WardAdmin")" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-left"></i>
+                                            Back to Dashboard
+                                        </a>
+                                    </div>
+                                    <div class="actions-right">
+                                        <button type="button" class="btn btn-outline-primary" onclick="resetForm()">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                            Reset Form
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="bi bi-person-check"></i>
+                                            Register Patient
+                                            @* <span class="spinner-border spinner-border-sm d-none" role="status"></span> *@
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Form submission handling
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = submitBtn.querySelector('.spinner-border');
+            const btnText = submitBtn.querySelector('i');
+
+            // Show loading state
+            //submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            btnText.classList.add('d-none');
+        });
+
+        // Auto-hide success messages
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(function() {
+                    alert.remove();
+                }, 300);
+            });
+        }, 5000);
+
+        // Reset form function
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all fields?')) {
+                document.getElementById('patientForm').reset();
+                // Clear validation messages
+                document.querySelectorAll('.field-validation').forEach(el => el.textContent = '');
+                document.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+            }
+        }
+
+        // Real-time validation feedback
+        document.querySelectorAll('.form-control, .form-select').forEach(function(input) {
+            input.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else if (this.hasAttribute('required') || this.closest('.form-group').querySelector('.required')) {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+
+        // Calculate age from date of birth
+        document.querySelector('input[name="DateOfBirth"]').addEventListener('change', function() {
+            if (this.value) {
+                const birthDate = new Date(this.value);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                const helper = this.parentElement.querySelector('.form-helper');
+                if (age >= 0) {
+                    helper.innerHTML = `<i class="bi bi-info-circle"></i> Patient age: ${age} years old`;
+                    helper.style.color = 'var(--success-color)';
+                }
+            }
+        });
+
+        // Form validation on submit
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = this.querySelectorAll('.form-control[required], .form-select[required]');
+
+            requiredFields.forEach(function(field) {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                document.querySelector('.is-invalid').focus();
+            }
+        });
+    </script>
+}

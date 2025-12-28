@@ -1,0 +1,130 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Consumable>
+@{
+    ViewData["Title"] = "Wards";
+    ViewData["ActivePage"] = "Wards"; // Set the active page for the navigation bar
+
+}
+<head>
+ <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+</head>
+<div class="dashboard-wrapper py-4">
+    <div class="container">
+     <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">           
+                <h1><i class="bi bi-clock-history"></i>Order History</h1>                
+                <div class="d-flex gap-2">  
+                        <div class="btn-group gap-2"> 
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("ConsumableManager"))
+                        {
+                            <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                                <i class="bi bi-arrow-left"></i>
+                                Back
+                            </a>
+                        }
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {    
+                        <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                                <i class="bi bi-arrow-left"></i>
+                                Back
+                            </a>
+                        }                  
+                    
+                    </div>                 
+                        
+                </div>
+            </div>
+        </div>
+     <form asp-action="Index" method="get" class="mb-3 d-flex justify-content-start ">
+             <div class="btn-group">
+                <input type="text" name="searchString"           
+                    placeholder="Search wards..." 
+                    class="form-control d-inline-block" />
+                <button type="submit" class="btn primary-btn">Search</button>
+            </div>
+        </form>
+
+
+ <div class="orders-table-wrapper table-container">           
+                <div class="table-responsive">
+                    <table class="table orders-table mb-0">    
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Active</th>
+                        <th>Action</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ward in Model)
+                    {
+                        <tr>
+                            <td>@ward.Name</td>
+                            <td>@ward.Category</td>
+                            <td>
+                                @if (ward.IsDeleted)
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>                      
+                                }
+                            </td>
+
+                            <td>
+                                <button type="button" class="btn btn-warning openEditModalBtn" data-id="@ward.ConsumableId">Edit</button>
+
+
+                                <a asp-action="Delete" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this consumable');" asp-route-id="@ward.ConsumableId">Delete</a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+</div>
+
+        </div>
+    </div>
+</div>
+</div>
+<div id="modalContainer2"></div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".openEditModalBtn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const consumableId = this.getAttribute("data-id");
+
+                    fetch(`/Consumable/EditConsumable/${consumableId}?partial=true`)
+                        .then(res => res.text())
+                        .then(html => {
+                            document.getElementById("modalContainer2").innerHTML = html;
+                            const modalEl = document.getElementById("editConsumableModal");
+                            const modal = new bootstrap.Modal(modalEl);
+                            modal.show();
+                        });
+                });
+            });
+
+            document.getElementById("openModalBtn").addEventListener("click", function () {
+                fetch('@Url.Action("NewConsumable", "Consumable", new { partial = true })')
+                    .then(res => res.text())
+                    .then(html => {
+                        document.getElementById("modalContainer").innerHTML = html;
+                        const modalEl = document.getElementById("addConsumableModal");
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    });
+            });
+        });
+
+
+    </script>
+
+}

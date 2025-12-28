@@ -1,0 +1,28 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Vital>
+
+@foreach (var vital in Model)
+{
+    <tr>
+        <td>
+            <div class="patient-info">
+                <div class="patient-avatar">
+                    @(vital.Patient?.FirstName?.Substring(0, 1))@(vital.Patient?.LastName?.Substring(0, 1))
+                </div>
+                <div class="patient-name">@vital.Patient?.FirstName @vital.Patient?.LastName</div>
+            </div>
+        </td>
+        <td>@vital.BP</td>
+        <td>@vital.SugarLevel</td>
+        <td>@vital.Temperature</td>
+        <td>@vital.PulseRate</td>
+        <td>@vital.Date</td>
+        <td>@vital.User?.FullName</td>
+        <td>
+            <div class="action-buttons">
+                <a asp-action="" class="action-btn btn-vitals">Details</a>
+                <a asp-action="EditVital" asp-route-id="@vital.VitalID" class="action-btn btn-treatment">Edit</a>
+                <a asp-action="DeleteVital" asp-route-id="@vital.VitalID" class="action-btn btn-medication">Delete</a>
+            </div>
+        </td>
+    </tr>
+}

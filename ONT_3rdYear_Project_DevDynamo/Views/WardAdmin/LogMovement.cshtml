@@ -1,0 +1,138 @@
+﻿@model ONT_3rdyear_Project.Models.Movement
+@{
+    ViewData["Title"] = "Log Patient Movement";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="~/css/WardAdmin/LogMovement.css" rel="stylesheet" />
+
+<div class="movement-container">
+    <div class="movement-card">
+        <div class="movement-header">
+            <i class="bi bi-arrow-right movement-header-icon"></i>
+            <h1 class="movement-title">Log Patient Movement</h1>
+            <p class="movement-subtitle">Track patient transfers between departments</p>
+        </div>
+
+        <div class="movement-body">
+            <!-- Patient Information Card -->
+            <div class="patient-info-card">
+                <h3 class="patient-info-title">Track Movement For</h3>
+                <div class="patient-info-detail">
+                    <div class="info-item">
+                        <span class="info-label">Patient Name</span>
+                        <span class="info-value">@ViewBag.PatientName</span>
+                    </div>
+                </div>
+            </div>
+
+            <!--errormessage-->
+
+            @if (TempData["Error Message"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <form asp-action="LogMovement" method="post">
+                <!-- Visual Movement Indicator -->
+                <div class="location-indicator">
+                    <div class="location-from">
+                        <div class="location-label">From Location</div>
+                        <div class="location-value">@ViewBag.CurrentLocation</div>
+                    </div>
+
+                    <div class="arrow-icon">
+                        <i class="bi bi-arrow-right"></i>
+                    </div>
+
+                    <div class="location-to">
+                        <div class="location-label">To Location</div>
+                        <div class="location-value" id="toLocationPreview">Select destination</div>
+                    </div>
+                </div>
+
+                <!-- From Location (readonly, auto-filled) -->
+                <div class="form-group">
+                    <label asp-for="FromLocation" class="form-label">From Location</label>
+                    <input asp-for="FromLocation" class="form-control" readonly value="@ViewBag.CurrentLocation" />
+                </div>
+
+                <!-- To Location -->
+                <div class="form-group">
+                    <label asp-for="ToLocation" class="form-label">To Location *</label>
+                    <select asp-for="ToLocation" class="form-select" required id="toLocationSelect">
+                        <option value="">-- Select Destination --</option>
+                        @foreach (var destination in ViewBag.Destinations)
+                        {
+                            <option value="@destination">@destination</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ToLocation" class="text-danger"></span>
+                </div>
+
+                <!-- Timestamp -->
+                <div class="form-group">
+                    <label asp-for="TimeStamp" class="form-label">Movement Time</label>
+                    <input asp-for="TimeStamp" type="datetime-local" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="TimeStamp" class="text-danger"></span>
+                </div>
+
+                <!-- Hidden required fields -->
+                <input type="hidden" asp-for="PatientID" value="@ViewBag.PatientID" />
+                <input type="hidden" asp-for="WardID" value="@ViewBag.WardID" />
+                <input type="hidden" asp-for="BedID" value="@ViewBag.BedID" />
+
+                <!-- Action buttons -->
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Log Movement
+                    </button>
+                    <a asp-action="ViewPatients" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Patients
+                    </a>
+                    <a asp-action="MovementHistory" asp-route-patientId="@ViewBag.PatientID" class="btn btn-outline-info">
+                        <i class="bi bi-clock-history"></i> View History
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toLocationSelect = document.getElementById('toLocationSelect');
+        const toLocationPreview = document.getElementById('toLocationPreview');
+
+        // Update preview when selection changes
+        toLocationSelect.addEventListener('change', function() {
+            toLocationPreview.textContent = this.value || 'Select destination';
+        });
+
+        // Set initial preview
+        if (toLocationSelect.value) {
+            toLocationPreview.textContent = toLocationSelect.value;
+        }
+
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            if (!toLocationSelect.value) {
+                e.preventDefault();
+                toLocationSelect.focus();
+                // Add visual error indication
+                toLocationSelect.style.borderColor = 'var(--danger-red)';
+            }
+        });
+
+        // Remove error indication when user starts interacting
+        toLocationSelect.addEventListener('input', function() {
+            this.style.borderColor = '';
+        });
+    });
+</script>

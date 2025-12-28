@@ -1,0 +1,408 @@
+﻿@model ONT_3rdyear_Project.Models.Patient
+@{
+    ViewData["Title"] = "Edit Patient";
+    var today = DateTime.Now.Date;
+    var dob = Model.DateOfBirth;
+    var age = today.Year - dob.Year;
+    if (today < dob.AddYears(age)) age--;
+
+}
+
+<link href="~/css/WardAdmin/EditPatient.css" rel="stylesheet" asp-append-version="true" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="modal-body">
+    <form id="editPatientForm" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="patientId" name="id" value="@Model.PatientID" />
+        <div class="edit-patient-content">
+            <!-- Patient Preview Card -->
+            <div class="patient-preview-card">
+                <div class="preview-avatar">
+                    @if (Model.Gender == "Male")
+                    {
+                        <i class="bi bi-person-fill text-primary"></i>
+                    }
+                    else if (Model.Gender == "Female")
+                    {
+                        <i class="bi bi-person-fill text-danger"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-person-fill text-secondary"></i>
+                    }
+                </div>
+                <div class="preview-info">
+                    <div class="current-name">@Model.FirstName @Model.LastName</div>
+                    <div class="patient-meta">
+                        <span class="meta-item">
+                            <i class="bi bi-calendar"></i>
+                            @age years old
+                        </span>
+                    </div>
+                </div>
+                <div class="admission-status">
+                    @if (Model.Admitted)
+                    {
+                        <span class="status-badge admitted">
+                            <i class="bi bi-hospital-fill"></i>
+                            Currently Admitted
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge available">
+                            <i class="bi bi-door-open-fill"></i>
+                            Not Admitted
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <!-- Alert Container for Messages -->
+            <div id="editAlertContainer" style="display: none;"></div>
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h6 class="section-title">
+                        <i class="bi bi-person-badge"></i>
+                        Personal Information
+                    </h6>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="FirstName" class="form-label required">
+                                <i class="bi bi-person"></i>
+                                First Name
+                            </label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Enter first name" required />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="LastName" class="form-label required">
+                                <i class="bi bi-person"></i>
+                                Last Name
+                            </label>
+                            <input asp-for="LastName" class="form-control" placeholder="Enter last name" required />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Gender" class="form-label required">
+                                <i class="bi bi-gender-ambiguous"></i>
+                                Gender
+                            </label>
+                            <select asp-for="Gender" class="form-select" required>
+                                <option value="">Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="DateOfBirth" class="form-label required">
+                                <i class="bi bi-calendar3"></i>
+                                Date of Birth
+                            </label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control"
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                            <div class="age-display" id="ageDisplay">@age years old</div>
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Information Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h6 class="section-title">
+                        <i class="bi bi-heart-pulse"></i>
+                        Medical Information
+                    </h6>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ChronicIllness" class="form-label">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                        Chronic Conditions & Medical Notes
+                    </label>
+                    <textarea asp-for="ChronicIllness" class="form-control" rows="4"
+                              placeholder="Describe any chronic illnesses, ongoing medical conditions, or important medical history. Type 'None' if not applicable."></textarea>
+                    <div class="form-help">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            Include any conditions, current medications, or information that medical staff should be aware of
+                        </small>
+                    </div>
+                    <span asp-validation-for="ChronicIllness" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- footern -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-success" id="saveChangesBtn">
+                    <i class="bi bi-check-circle"></i>
+                    <span class="btn-text">Save Changes</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+
+<script>
+    let originalData = {
+        firstName: '@Model.FirstName',
+        lastName: '@Model.LastName',
+        gender: '@Model.Gender',
+        dateOfBirth: '@Model.DateOfBirth.ToString("yyyy-MM-dd")',
+        chronicIllness: '@Html.Raw(Html.Encode(Model.ChronicIllness ?? "").ToString().Replace("'", "\\'"))'
+    };
+
+    // Track changes
+    function trackChanges() {
+        const form = document.getElementById('editPatientForm');
+        const formData = new FormData(form);
+        const changes = [];
+
+        if (formData.get('firstName') !== originalData.firstName) {
+            changes.push(`Name: ${originalData.firstName} → ${formData.get('firstName')}`);
+        }
+        if (formData.get('lastName') !== originalData.lastName) {
+            changes.push(`Last Name: ${originalData.lastName} → ${formData.get('lastName')}`);
+        }
+        if (formData.get('gender') !== originalData.gender) {
+            changes.push(`Gender: ${originalData.gender} → ${formData.get('gender')}`);
+        }
+        if (formData.get('dateOfBirth') !== originalData.dateOfBirth) {
+            changes.push(`Date of Birth: ${originalData.dateOfBirth} → ${formData.get('dateOfBirth')}`);
+        }
+        if (formData.get('chronicIllness') !== originalData.chronicIllness) {
+            changes.push('Medical information updated');
+        }
+
+        const changesList = document.getElementById('changesList');
+        if (changes.length > 0) {
+            changesList.innerHTML = changes.join('<br>');
+            changesList.style.color = '#d97706';
+        } else {
+            changesList.innerHTML = 'No changes detected';
+            changesList.style.color = '#6b7280';
+        }
+    }
+
+    // Calculate age from date of birth
+    function updateAge() {
+        const dobInput = document.getElementById('dateOfBirth');
+        const ageDisplay = document.getElementById('ageDisplay');
+    
+        if (dobInput.value) {
+            const birthDate = new Date(dobInput.value);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+        
+            if (age >= 0 && age <= 150) {
+                ageDisplay.innerHTML = `${age} years old`;
+                ageDisplay.style.color = '#059669';
+            } else {
+                ageDisplay.innerHTML = 'Invalid date';
+                ageDisplay.style.color = '#dc2626';
+            }
+        }
+    }
+
+    // Form validation
+    function validateForm() {
+        const form = document.getElementById('editPatientForm');
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            const value = field.value.trim();
+            const feedback = field.nextElementSibling;
+        
+            if (!value) {
+                field.classList.add('is-invalid');
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = `${field.labels[0].textContent.replace('*', '').trim()} is required`;
+                }
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+
+        return isValid;
+    }
+
+    // Save changes
+    async function savePatientChanges() {
+        if (!validateForm()) {
+            showModalAlert('Please fill in all required fields.', 'danger');
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveChangesBtn');
+        const btnContent = saveBtn.querySelector('.btn-content');
+        const btnLoader = saveBtn.querySelector('.btn-loader');
+    
+        // Show loading state
+        btnContent.style.display = 'none';
+        btnLoader.style.display = 'inline-block';
+        saveBtn.disabled = true;
+
+        try {
+            const form = document.getElementById('editPatientForm');
+            const formData = new FormData(form);
+
+            const response = await fetch('@Url.Action("EditPatient", "WardAdmin")', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showModalAlert(result.message, 'success');
+            
+                // Update the original data
+                originalData = {
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
+                    gender: formData.get('gender'),
+                    dateOfBirth: formData.get('dateOfBirth'),
+                    chronicIllness: formData.get('chronicIllness')
+                };
+            
+                trackChanges();
+            
+                // Close modal after delay and refresh parent page
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editPatientModal'));
+                    modal.hide();
+                
+                    // Show success message on parent page
+                    if (typeof refreshPatientsTable === 'function') {
+                        refreshPatientsTable();
+                    } else {
+                        location.reload();
+                    }
+                }, 1500);
+            
+            } else {
+                showModalAlert(result.message, 'danger');
+            }
+        } catch (error) {
+            showModalAlert('An error occurred while saving. Please try again.', 'danger');
+            console.error('Error:', error);
+        } finally {
+            // Hide loading state
+            btnContent.style.display = 'inline-block';
+            btnLoader.style.display = 'none';
+            saveBtn.disabled = false;
+        }
+    }
+
+    // Show alerts in modal
+    function showModalAlert(message, type) {
+        const alertContainer = document.getElementById('modalAlertContainer');
+        const alertTypes = {
+            'success': { class: 'alert-success', icon: 'bi-check-circle-fill' },
+            'danger': { class: 'alert-danger', icon: 'bi-exclamation-triangle-fill' },
+            'warning': { class: 'alert-warning', icon: 'bi-exclamation-circle-fill' }
+        };
+    
+        const alertInfo = alertTypes[type] || alertTypes['danger'];
+    
+        alertContainer.innerHTML = `
+            <div class="alert ${alertInfo.class} alert-dismissible fade show" role="alert">
+                <i class="bi ${alertInfo.icon} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    
+        alertContainer.style.display = 'block';
+    
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                const alert = alertContainer.querySelector('.alert');
+                if (alert) {
+                    alert.classList.remove('show');
+                    setTimeout(() => {
+                        alertContainer.style.display = 'none';
+                    }, 150);
+                }
+            }, 3000);
+        }
+    }
+
+    // Initialize event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Track changes on input
+        const form = document.getElementById('editPatientForm');
+        form.addEventListener('input', trackChanges);
+        form.addEventListener('change', trackChanges);
+    
+        // Age calculation
+        document.getElementById('dateOfBirth').addEventListener('change', updateAge);
+    
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    });
+
+    // Preview changes function
+    function previewChanges() {
+        const form = document.getElementById('editPatientForm');
+        const formData = new FormData(form);
+    }
+    
+</script>

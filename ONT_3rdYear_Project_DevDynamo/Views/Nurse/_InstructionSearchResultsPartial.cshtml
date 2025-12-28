@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Instruction>
+
+@foreach (var instruction in Model)
+{
+    <tr class="patient-row">
+        <td>
+            <div class="patient-info">
+                <div class="patient-avatar">
+                    @(instruction.Patient.FirstName?.Substring(0, 1))@(instruction.Patient.LastName?.Substring(0, 1))
+                </div>
+                <div class="patient-name">@instruction.Patient.FirstName @instruction.Patient.LastName</div>
+            </div>
+        </td>
+        <td>
+            <div class="request-text" title="@instruction.NurseRequest">
+                <strong>@instruction.NurseRequest</strong>
+            </div>
+        </td>
+        <td>
+            @if (string.IsNullOrEmpty(instruction.Instructions))
+            {
+                <span class="status-badge status-pending">
+                    <i class="fas fa-clock"></i>
+                    Pending
+                </span>
+            }
+            else
+            {
+                <span class="status-badge status-reviewed">
+                    <i class="fas fa-check-circle"></i>
+                    Reviewed
+                </span>
+            }
+        </td>
+        <td class="text-center">
+            <div class="action-buttons">
+                <a asp-action="EditRequest" asp-route-id="@instruction.InstructionID" class="action-btn btn-treatment" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Request">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button class="action-btn delete-btn" data-id="@instruction.InstructionID" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Request">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+}

@@ -1,0 +1,105 @@
+﻿@model ONT_3rdyear_Project.ViewModels.StockTakeViewModel
+
+@{
+    ViewData["Title"] = "New Stock Take";
+}
+<head>
+    <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+</head>
+<div class="dashboard-wrapper">
+    <div class="container">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h1><i class="bi bi-clipboard-check"></i>Stock Management</h1>
+                <div class="btn-group gap-2">
+                    <a asp-controller="Consumable" asp-action="Dashboard" class="btn back-button mt-2 text-nowrap"><i class="bi bi-arrow-left"></i>Back</a>
+                </div>
+            </div>
+        </div>  
+      
+    <div class="order-page">
+        <div class="form-section">
+            <form asp-action="StockTake" method="post">
+                <input type="hidden" asp-for="TakenByID" />
+                <div class="mb-3 select">
+                    <label asp-for="WardID" class="form-label">Wards</label>
+                    <select asp-for="WardID" asp-items="ViewBag.Wards" class="form-select" id="wardSelect">
+                        <option value="">--Select a ward--</option>
+                    </select>
+                    <span asp-validation-for="WardID" class="text-danger"></span>
+                </div>
+
+                <hr />
+                <h4>Consumables</h4>
+                
+                <div class="table-responsive">
+                <table class="table orders-table" id="consumablesTable">
+                    <thead>
+                        <tr>
+                            <th>Consumable</th>
+                            <th>System Qty</th>
+                            <th>Counted Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS will populate rows here -->
+                    </tbody>
+                </table>
+                </div>
+              
+                <button type="submit" class="action-btn success mt-3 float-end">Save Stock Take</button>
+            </form>
+        </div>
+
+  <div class="sidebar">
+    <div class="summary-card">
+      <h3>🧾 Order Summary</h3>
+        <p><strong>Ward:</strong> <span id="selectedWard"></span></p>
+       <a asp-controller="Consumable" asp-action="WardConsumables" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"> </i>Stock Management
+                    </a>
+     
+    </div>
+
+    <div class="tips-card">
+      <h4>💡 Tips</h4>
+      <ul>
+        <li>Ensure quantities are correct.</li>
+        <li>Only submit once all fields are filled.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $('#wardSelect').change(function () {
+            const wardId = $(this).val();
+            $.getJSON(`/Consumable/GetConsumablesByWard?wardId=${wardId}`, function (data) {
+                const table = $('#consumablesTable tbody');
+                table.empty();
+                let index = 0;
+                console.log(data); // Debugging line to check the data structure
+                data.forEach(item => {
+                    table.append(`
+                        <tr>
+                            <td>
+                                ${item.consumableName}
+                                <input type="hidden" name="Items[${index}].ConsumableID" value="${item.consumableID}" />
+                                <input type="hidden" name="Items[${index}].ConsumableName" value="${item.consumableName}" />
+                                <input type="hidden" name="Items[${index}].SystemQuantity" value="${item.systemQuantity}" />
+                            </td>
+                            <td>${item.systemQuantity}</td>
+                            <td>
+                                <input name="Items[${index}].CountedQuantity" type="number" class="form-control w" value="0" min="0" required />
+                            </td>
+                        </tr>
+                    `);index++;
+                });
+            });
+        });
+    </script>
+}

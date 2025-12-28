@@ -1,0 +1,28 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Treatment>
+
+@foreach (var treatment in Model)
+{
+    <tr>
+        <td>
+            <div class="patient-info">
+                <div class="patient-avatar">
+                    @(treatment.Patient?.FirstName.Substring(0, 1))@(treatment.Patient.LastName.Substring(0, 1))
+                </div>
+                <div class="patient-name">@treatment.Patient?.FirstName @treatment.Patient?.LastName</div>
+            </div>
+        </td>
+        @* <td>@treatment.VisitSchedule?.VisitDate</td> *@
+        <td>@treatment.User?.FullName</td>
+        <td>@treatment.TreatmentType</td>
+        <td>@treatment.TreatmentDate</td>
+        <td>
+            <div class="action-buttons">
+
+                <a asp-action="EditTreatment" asp-route-id="@treatment.TreatmentID" class="action-btn btn-instructions">Edit</a>
+                @* <a asp-action="DeleteTreatment" asp-route-id="@treatment.TreatmentID" class="action-btn btn-vitals">Delete</a> *@
+                <a href="javascript:void(0);" class="action-btn btn-medication" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="@treatment.TreatmentID" data-name="@treatment.Patient?.FirstName @treatment.Patient?.LastName">Delete</a>
+            </div>
+
+        </td>
+    </tr>
+}

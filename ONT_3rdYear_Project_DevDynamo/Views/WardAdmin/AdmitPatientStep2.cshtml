@@ -1,0 +1,342 @@
+﻿@model ONT_3rdyear_Project.WardAdminViewModels.AllergiesStepViewModel
+@{
+    ViewData["Title"] = "Admit Patient - Step 2: Allergies";
+}
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="~/css/WardAdmin/AdmissionSteps.css" rel="stylesheet" asp-append-version="true">
+
+
+<div class="admission-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="admission-header">
+            <div class="back-button">
+                <a asp-action="AdmitPatientStep1" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Step 1
+                </a>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step">
+                    <div class="step-number completed">1</div>
+                    <span class="step-label">Basic Info</span>
+                </div>
+                <div class="step-connector active"></div>
+                <div class="progress-step">
+                    <div class="step-number active">2</div>
+                    <span class="step-label active">Allergies</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="progress-step">
+                    <div class="step-number">3</div>
+                    <span class="step-label">Medical History</span>
+                </div>
+                <div class="step-connector"></div>
+                <div class="progress-step">
+                    <div class="step-number">4</div>
+                    <span class="step-label">Summary</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="admission-card">
+            <div class="card-header" style="background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);">
+                <h4>
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Step 2: Record Allergies
+                </h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="AdmitPatientStep2" method="post" id="allergiesForm">
+                    <input type="hidden" name="PatientID" value="@Model.PatientID" />
+
+                    <div class="allergy-management">
+                        <h5 class="form-section-title">
+                            <i class="bi bi-list-check"></i>
+                            Patient Allergies
+                        </h5>
+
+                        <!-- Allergies List -->
+                        <div class="allergy-list" id="allergiesList">
+                            @if (Model.Allergies != null && Model.Allergies.Any())
+                            {
+                                for (int i = 0; i < Model.Allergies.Count; i++)
+                                {
+                                    <div class="allergy-item" data-index="@i">
+                                        <div class="allergy-header">
+                                            <span class="allergy-name">
+                                                @(Model.Allergies[i].SelectedAllergyId == 0 ?
+                                                                                        Model.Allergies[i].OtherAllergyName :
+                                                                                        Model.AllergyOptions.FirstOrDefault(a => a.Value == Model.Allergies[i].SelectedAllergyId.ToString())?.Text)
+                                    </span>
+                                    <button type="button" class="remove-allergy" onclick="removeAllergy(@i)">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                    </button>
+                                </div>
+                                <div class="allergy-details">
+                                    <div class="allergy-severity">
+                                        <span class="severity-badge severity-@Model.Allergies[i].Severity?.ToLower()">
+                                            @Model.Allergies[i].Severity
+                                        </span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(Model.Allergies[i].Notes))
+                                            {
+                                                <div class="allergy-notes">
+                                                    <i class="bi bi-chat-text"></i> @Model.Allergies[i].Notes
+                                                </div>
+                                            }
+                                        </div>
+                                        <!-- Hidden fields for form submission -->
+                                        <input type="hidden" asp-for="Allergies[i].SelectedAllergyId" />
+                                        <input type="hidden" asp-for="Allergies[i].OtherAllergyName" />
+                                        <input type="hidden" asp-for="Allergies[i].OtherAllergyDescription" />
+                                        <input type="hidden" asp-for="Allergies[i].Severity" />
+                                        <input type="hidden" asp-for="Allergies[i].Notes" />
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-allergies-message">
+                                    <i class="bi bi-check-circle"></i>
+                                    <h5>No Allergies Recorded</h5>
+                                    <p>Click the button below to add the patient's first allergy</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Add Allergy Button -->
+                        <button type="button" class="add-allergy-btn" onclick="showAllergyForm()">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Allergy
+                        </button>
+
+                        <!-- New Allergy Form (Initially Hidden) -->
+                        <div class="allergy-form-container" id="allergyForm" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label required">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Allergy Type
+                                </label>
+                                <select class="form-select" id="newAllergyType" onchange="toggleOtherAllergyFields()">
+                                    <option value="">-- Select Allergy Type --</option>
+                                    @foreach (var option in Model.AllergyOptions)
+                                    {
+                                        <option value="@option.Value">@option.Text</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Other Allergy Fields -->
+                            <div class="other-allergy-fields" id="otherAllergyFields" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label required">
+                                        <i class="bi bi-tag"></i>
+                                        Allergy Name
+                                    </label>
+                                    <input type="text" class="form-control" id="newOtherAllergyName" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="bi bi-textarea-t"></i>
+                                        Description
+                                    </label>
+                                    <textarea class="form-control" id="newOtherAllergyDescription" rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label required">
+                                    <i class="bi bi-activity"></i>
+                                    Severity
+                                </label>
+                                <select class="form-select" id="newAllergySeverity">
+                                    <option value="">-- Select Severity --</option>
+                                    <option value="Mild">Mild</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Severe">Severe</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="bi bi-chat-text"></i>
+                                    Notes
+                                </label>
+                                <textarea class="form-control" id="newAllergyNotes" rows="2"
+                                          placeholder="Additional information about the allergy reaction..."></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="hideAllergyForm()">
+                                    <i class="bi bi-x"></i>
+                                    Cancel
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="addAllergy()">
+                                    <i class="bi bi-plus"></i>
+                                    Add Allergy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a asp-action="AdmitPatientStep1" class="btn btn-secondary" asp-route-patientId="@Model.PatientID">
+                            <i class="bi bi-arrow-left"></i>
+                            Previous
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            Next: Medical History
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let allergyCount = @(Model.Allergies?.Count ?? 0);
+
+        function showAllergyForm() {
+            document.getElementById('allergyForm').style.display = 'block';
+            document.querySelector('.add-allergy-btn').style.display = 'none';
+            resetAllergyForm();
+        }
+
+        function hideAllergyForm() {
+            document.getElementById('allergyForm').style.display = 'none';
+            document.querySelector('.add-allergy-btn').style.display = 'block';
+        }
+
+        function toggleOtherAllergyFields() {
+            const allergyType = document.getElementById('newAllergyType');
+            const otherFields = document.getElementById('otherAllergyFields');
+
+            if (allergyType.value === '0') {
+                otherFields.style.display = 'block';
+            } else {
+                otherFields.style.display = 'none';
+            }
+        }
+
+        function resetAllergyForm() {
+            document.getElementById('newAllergyType').value = '';
+            document.getElementById('newOtherAllergyName').value = '';
+            document.getElementById('newOtherAllergyDescription').value = '';
+            document.getElementById('newAllergySeverity').value = '';
+            document.getElementById('newAllergyNotes').value = '';
+            document.getElementById('otherAllergyFields').style.display = 'none';
+        }
+
+        function addAllergy() {
+            const allergyType = document.getElementById('newAllergyType');
+            const otherName = document.getElementById('newOtherAllergyName');
+            const severity = document.getElementById('newAllergySeverity');
+            const notes = document.getElementById('newAllergyNotes');
+
+            
+            if (!allergyType.value) {
+                alert('Please select an allergy type');
+                return;
+            }
+
+            if (allergyType.value === '0' && !otherName.value.trim()) {
+                alert('Please enter the allergy name');
+                return;
+            }
+
+            if (!severity.value) {
+                alert('Please select the severity level');
+                return;
+            }
+
+            const allergyName = allergyType.value === '0' ?
+                otherName.value.trim() :
+                allergyType.options[allergyType.selectedIndex].text;
+
+            const allergyItem = document.createElement('div');
+            allergyItem.className = 'allergy-item';
+            allergyItem.dataset.index = allergyCount;
+
+            allergyItem.innerHTML = `
+                <div class="allergy-header">
+                    <span class="allergy-name">${allergyName}</span>
+                    <button type="button" class="remove-allergy" onclick="removeAllergy(${allergyCount})">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </button>
+                </div>
+                <div class="allergy-details">
+                    <div class="allergy-severity">
+                        <span class="severity-badge severity-${severity.value.toLowerCase()}">
+                            ${severity.value}
+                        </span>
+                    </div>
+                    ${notes.value ? `
+                    <div class="allergy-notes">
+                        <i class="bi bi-chat-text"></i> ${notes.value}
+                    </div>
+                    ` : ''}
+                </div>
+                <input type="hidden" name="Allergies[${allergyCount}].SelectedAllergyId" value="${allergyType.value}" />
+                <input type="hidden" name="Allergies[${allergyCount}].OtherAllergyName" value="${allergyType.value === '0' ? otherName.value : ''}" />
+                <input type="hidden" name="Allergies[${allergyCount}].OtherAllergyDescription" value="${allergyType.value === '0' ? document.getElementById('newOtherAllergyDescription').value : ''}" />
+                <input type="hidden" name="Allergies[${allergyCount}].Severity" value="${severity.value}" />
+                <input type="hidden" name="Allergies[${allergyCount}].Notes" value="${notes.value}" />
+            `;
+
+            const noAllergiesMsg = document.querySelector('.no-allergies-message');
+            if (noAllergiesMsg) {
+                noAllergiesMsg.remove();
+            }
+
+            document.getElementById('allergiesList').appendChild(allergyItem);
+            allergyCount++;
+
+            hideAllergyForm();
+        }
+
+        function removeAllergy(index) {
+            const allergyItem = document.querySelector(`.allergy-item[data-index="${index}"]`);
+            if (allergyItem) {
+                allergyItem.remove();
+
+                
+                const items = document.querySelectorAll('.allergy-item');
+                if (items.length === 0) {
+
+                    const allergiesList = document.getElementById('allergiesList');
+                    allergiesList.innerHTML = `
+                        <div class="no-allergies-message">
+                            <i class="bi bi-check-circle"></i>
+                            <h5>No Allergies Recorded</h5>
+                            <p>Click the button below to add the patient's first allergy</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+
+        document.getElementById('allergiesForm').addEventListener('submit', function(e) {
+
+        });
+    </script>
+}

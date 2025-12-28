@@ -1,0 +1,1314 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.ViewModels.EmployeeViewModel>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "Employees";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="~/css/Admin/EmployeesList.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '@TempData["Success"]',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+}
+
+<style>
+    /* CSS Variables matching VitalsList.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        position: relative;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 2rem;
+    }
+
+    /* Header Styles */
+    .patients-header {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        margin-top: 80px;
+        max-width: 1340px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: #002e51;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        padding: 10px;
+    }
+
+        .page-title i {
+            color: #002e51;
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        padding: 2rem 0 4rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Search Section */
+    .search-section {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: var(--bg-card);
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+            outline: none;
+        }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #0066a6;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-danger {
+        background: var(--danger-red);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    /* Cards Container */
+    .patients-cards-container {
+        background: #e6f7ff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 70vh;
+    }
+
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+        .cards-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Stat Badges */
+    .stat-badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        border: 2px solid var(--border-color);
+    }
+
+        .stat-badge.active {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .stat-badge.inactive {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .stat-badge i {
+            font-size: 1rem;
+        }
+
+    /* Add Button */
+    .add-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-blue);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+        .add-btn:hover {
+            background: #0066a6;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Table Container */
+    .table-container {
+        overflow-y: auto;
+        max-height: calc(70vh - 240px);
+        flex: 1;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+
+    .patients-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+    }
+
+        .patients-table thead th {
+            background: var(--primary-light);
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .patients-table tbody td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .patients-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    .patient-row:hover td {
+        background: var(--primary-light);
+    }
+
+    .th-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .th-content i {
+            color: var(--primary-blue);
+        }
+
+    /* Patient Info Styles */
+    .patient-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .patient-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary-blue), var(--secondary-teal));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .patient-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    /* Role Badge */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(67, 233, 123, 0.1) 100%);
+        color: var(--primary-blue);
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+        .status-badge.active {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-badge.inactive {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-secondary);
+        }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        color: white;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+    }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+            color: white;
+        }
+
+    .edit-btn {
+        background: linear-gradient(45deg, var(--primary-blue), var(--secondary-teal));
+    }
+
+    .delete-btn {
+        background: linear-gradient(45deg, var(--danger-red), #ff6b6b);
+    }
+
+    .toggle-btn {
+        background: linear-gradient(45deg, var(--warning-orange), #ffa500);
+    }
+
+    .reset-btn {
+        background: linear-gradient(45deg, var(--accent-green), #34d399);
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .modal-header {
+        background: var(--primary-light);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        background: var(--bg-card);
+        box-shadow: var(--shadow-medium);
+        border-right: 1px solid var(--border-color);
+        transition: left 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+    .sidebar-header {
+        padding: 2rem 1.5rem 1rem;
+        background: #99ddff;
+        color: white;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+    }
+
+    .nav-item {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+    .sidebar-toggle {
+        position: fixed;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-medium);
+        transition: all 0.3s ease;
+        z-index: 1001;
+        font-size: 1.2rem;
+    }
+
+        .sidebar-toggle:hover {
+            background: var(--secondary-teal);
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle.open {
+            left: 300px;
+        }
+
+    .sidebar-overlay {
+        position: fixed;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    /* Adjust main content when sidebar is open */
+    .main-content {
+        transition: margin-left 0.3s ease;
+    }
+
+        .main-content.sidebar-open {
+            margin-left: 280px;
+        }
+
+    /* Scrollbar styling */
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+    /* Animation for table rows */
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .patients-cards-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .cards-header
+
+    {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .sidebar
+
+    {
+        width: 250px;
+        left: -250px;
+    }
+
+    .sidebar-toggle.open {
+        left: 270px;
+    }
+
+    .main-content.sidebar-open {
+        margin-left: 0;
+    }
+
+    .patients-content {
+        padding: 1rem 0 2rem;
+    }
+
+    .search-section {
+        padding: 1rem;
+    }
+
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .patients-cards-container {
+        margin: 0 0.5rem;
+        padding: 1rem;
+        max-height: 75vh;
+    }
+
+    .cards-header {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+        .cards-header h3 {
+            font-size: 1.1rem;
+        }
+
+    .stat-badges {
+        width: 100%;
+    }
+
+    .stat-badge {
+        flex: 1;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .patients-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+        .patients-table thead th,
+        .patients-table tbody td {
+            padding: 1rem 0.5rem;
+        }
+
+    .patient-info {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .patients-content
+
+    {
+        padding: 1rem 0 2rem;
+    }
+
+    .search-section {
+        padding: 1rem;
+    }
+
+    .patients-cards-container {
+        padding: 0.75rem;
+        max-height: 80vh;
+    }
+
+    .patients-table thead th,
+    .patients-table tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .patient-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+
+    .patient-name {
+        font-size: 0.9rem;
+    }
+
+    .role-badge,
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .stat-badge {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.5rem;
+    }
+
+        .stat-badge strong {
+            font-size: 0.75rem;
+        }
+
+    }
+
+    /* Additional utility classes */
+    .text-center {
+        text-align: center;
+    }
+
+    .text-muted {
+        color: var(--text-secondary);
+    }
+
+    .d-inline {
+        display: inline;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -0.5rem;
+        margin-left: -0.5rem;
+    }
+
+    .col-md-3,
+    .col-md-6 {
+        position: relative;
+        width: 100%;
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .col-md-3
+
+    {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    }
+
+    /* Container */
+    .container {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    @@media (min-width: 576px) {
+        .container
+
+    {
+        max-width: 540px;
+    }
+
+    }
+
+    @@media (min-width: 768px) {
+        .container
+
+    {
+        max-width: 720px;
+    }
+
+    }
+
+    @@media (min-width: 992px) {
+        .container
+
+    {
+        max-width: 960px;
+    }
+
+    }
+
+    @@media (min-width: 1200px) {
+        .container
+
+    {
+        max-width: 1340px;
+    }
+
+    }
+</style>
+
+<div class="patients-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="fas fa-user-shield"></i>
+                Navigation
+            </h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Employees" class="nav-item active">
+                <i class="fas fa-users"></i>
+                <span>Employees</span>
+            </a>
+            <a asp-action="Dashboard" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Main Content -->
+        <div class="patients-content">
+            <div class="patients-header">
+                <div class="title-section">
+                    <h1 class="page-title">
+                        <i class="fas fa-users"></i>
+                        Employee Management
+                    </h1>
+                    <p class="page-subtitle">Manage staff members and personnel records</p>
+                </div>
+            </div>
+
+            <div class="container">
+                <!-- Search Section -->
+                <div class="search-section">
+                    <form method="get" asp-action="Employees" class="search-form">
+                        <div class="row mb-3 w-100">
+                            <div class="col-md-6">
+                                <input type="text"
+                                       id="realTimeSearch"
+                                       name="searchEmployee"
+                                       class="form-control"
+                                       placeholder="🔍 Search by name or email..."
+                                       autocomplete="off" />
+                            </div>
+                            <div class="col-md-3">
+                                <select name="roleFilter" class="form-control">
+                                    <option value="">All Roles</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Nurse">Nurse</option>
+                                    <option value="Doctor">Doctor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="statusFilter" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Employees Table -->
+                <div class="patients-cards-container">
+                    <div class="cards-header">
+                        <h3>
+                            <i class="fas fa-users"></i>
+                            Employee Records
+                            <small id="results-count" class="text-muted" style="font-size: 0.8rem; margin-left: 0.5rem;">
+                                (@Model.Count() employees)
+                            </small>
+                        </h3>
+
+                        <div class="header-right">
+                            <div class="stat-badges">
+                                <div class="stat-badge active">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Active: <strong>@Model.Count(e => e.IsActive)</strong></span>
+                                </div>
+                                <div class="stat-badge inactive">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    <span>Inactive: <strong>@Model.Count(e => !e.IsActive)</strong></span>
+                                </div>
+                            </div>
+                            <a asp-action="AddEmployee" class="btn btn-primary add-btn">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Add Employee</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-container" id="searchResults">
+                        <table class="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-user"></i>
+                                            Name & Surname
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-envelope"></i>
+                                            Email
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-award"></i>
+                                            Role
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-signal"></i>
+                                            Status
+                                        </span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span class="th-content">
+                                            <i class="fas fa-cog"></i>
+                                            Actions
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var emp in Model)
+                                {
+                                    <tr class="patient-row">
+                                        <td>
+                                            <div class="patient-info">
+                                                <div class="patient-avatar">
+                                                    @emp.FullName.Substring(0, 1).ToUpper()
+                                                </div>
+                                                <div class="patient-details">
+                                                    <div class="patient-name">@emp.FullName</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <strong>@emp.Email</strong>
+                                        </td>
+                                        <td>
+                                            <span class="role-badge">
+                                                <i class="bi bi-briefcase"></i>
+                                                @emp.Role
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (emp.IsActive)
+                                            {
+                                                <span class="status-badge active">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    Active
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge inactive">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                    Inactive
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <a asp-action="EditEmployee" asp-route-id="@emp.Id"
+                                                   class="action-btn edit-btn"
+                                                   title="Edit Employee">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="javascript:void(0);"
+                                                   class="action-btn delete-btn"
+                                                   data-bs-toggle="modal"
+                                                   data-bs-target="#deleteModal"
+                                                   data-id="@emp.Id"
+                                                   data-name="@emp.FullName"
+                                                   title="Delete Employee">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                                <a asp-action="ToggleEmployeeStatus" asp-route-id="@emp.Id"
+                                                   class="action-btn toggle-btn"
+                                                   title="@(emp.IsActive ? "Deactivate" : "Activate") Employee">
+                                                    <i class="fas fa-@(emp.IsActive ? "pause-circle" : "play-circle")"></i>
+                                                </a>
+                                                <form asp-action="ForcePasswordReset" asp-route-id="@emp.Id" method="post" class="d-inline">
+                                                    <button type="submit"
+                                                            class="action-btn reset-btn"
+                                                            title="Reset Password"
+                                                            onclick="return confirm('Force password reset for this employee?')">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete employee <strong id="deleteEmployeeName"></strong>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mainContent = document.getElementById('mainContent');
+
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+        sidebarToggle.classList.toggle('open');
+
+        if (window.innerWidth > 768) {
+            mainContent.classList.toggle('sidebar-open');
+        }
+    });
+
+    sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+        sidebarToggle.classList.remove('open');
+        mainContent.classList.remove('sidebar-open');
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            mainContent.classList.remove('sidebar-open');
+        }
+    });
+
+    // Delete functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        let deleteEmployeeId = null;
+        let deleteRow = null;
+
+        const deleteModal = document.getElementById('deleteModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                deleteEmployeeId = button.getAttribute('data-id');
+                const employeeName = button.getAttribute('data-name');
+
+                document.getElementById('deleteEmployeeName').textContent = employeeName;
+                deleteRow = button.closest('tr');
+            });
+
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (!deleteEmployeeId) return;
+
+                fetch(`/Admin/DeleteEmployee/${deleteEmployeeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        if (deleteRow){
+                            deleteRow.remove();
+                        }
+                        const modalInstance = bootstrap.Modal.getInstance(deleteModal);
+                        modalInstance.hide();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Employee successfully deleted.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        throw new Error('Delete failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to delete employee.'
+                    });
+                });
+            });
+        }
+    });
+
+    // Real-time search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('realTimeSearch');
+        const roleFilter = document.querySelector('select[name="roleFilter"]');
+        const statusFilter = document.querySelector('select[name="statusFilter"]');
+        let searchTimeout;
+
+        async function performSearch(searchTerm) {
+            try {
+                const tableBody = document.querySelector('.patients-table tbody');
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Searching...</td></tr>';
+
+                const roleValue = roleFilter ? roleFilter.value : '';
+                const statusValue = statusFilter ? statusFilter.value : '';
+
+                const params = new URLSearchParams({
+                    searchEmployee: searchTerm,
+                    roleFilter: roleValue,
+                    statusFilter: statusValue
+                });
+
+                const response = await fetch(`@Url.Action("Employees")?${params}`);
+                const text = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const newTableBody = doc.querySelector('.patients-table tbody');
+                const resultsCount = doc.querySelector('#results-count');
+
+                if (newTableBody) {
+                    tableBody.innerHTML = newTableBody.innerHTML;
+
+                    if (resultsCount) {
+                        document.getElementById('results-count').innerHTML = resultsCount.innerHTML;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+            }
+        }
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(() => {
+                if (searchTerm.length === 0 || searchTerm.length >= 2) {
+                    performSearch(searchTerm);
+                }
+            }, 300);
+        });
+
+        if (roleFilter) {
+            roleFilter.addEventListener('change', function() {
+                performSearch(searchInput.value.trim());
+            });
+        }
+
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                performSearch(searchInput.value.trim());
+            });
+        }
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                performSearch(e.target.value.trim());
+            }
+        });
+    });
+</script>

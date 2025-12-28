@@ -1,0 +1,999 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Medication>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "Medications";
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+
+    var today = DateOnly.FromDateTime(DateTime.Now);
+    var threeMonthsFromNow = today.AddMonths(3);
+    var medications = Model.ToList();
+    var inStockCount = medications.Count(m => m.Quantity > 0);
+    var lowStockCount = medications.Count(m => m.Quantity <= 20 && m.Quantity > 0);
+    var expiringCount = medications.Count(m => m.ExpiryDate <= threeMonthsFromNow);
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="~/css/Pharmacist/MedicationsList.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: '@TempData["SuccessMessage"]',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+}
+
+<style>
+    /* CSS Variables matching VitalsList.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --warning-color: #fbbf24;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        position: relative;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 2rem;
+    }
+
+    /* Header Styles */
+    .patients-header {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        margin-top: 80px;
+        max-width: 1340px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: #002e51;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        padding: 10px;
+    }
+
+        .page-title i {
+            color: #002e51;
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        padding: 2rem 0 4rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Statistics Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+        .stat-icon.total {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-teal));
+        }
+
+        .stat-icon.stock {
+            background: linear-gradient(135deg, var(--accent-green), #34d399);
+        }
+
+        .stat-icon.low {
+            background: linear-gradient(135deg, var(--warning-orange), #ffa500);
+        }
+
+        .stat-icon.expiring {
+            background: linear-gradient(135deg, var(--danger-red), #ff6b6b);
+        }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Search Section */
+    .search-section {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        flex: 1;
+        min-width: 250px;
+    }
+
+        .search-box i {
+            color: var(--text-secondary);
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            flex: 1;
+            font-family: inherit;
+        }
+
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: var(--bg-card);
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+            outline: none;
+        }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #0066a6;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-danger {
+        background: var(--danger-red);
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: var(--text-secondary);
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #2d3748;
+            color: white;
+        }
+
+    /* Cards Container */
+    .patients-cards-container {
+        background: #e6f7ff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 70vh;
+    }
+
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+        .cards-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Add Button */
+    .add-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-blue);
+        color: white;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+        .add-btn:hover {
+            background: #0066a6;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Table Container */
+    .table-container {
+        overflow-y: auto;
+        max-height: calc(70vh - 240px);
+        flex: 1;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+
+    .patients-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+    }
+
+        .patients-table thead th {
+            background: var(--primary-light);
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .patients-table tbody td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .patients-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    .patient-row {
+        transition: all 0.3s ease;
+    }
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        /*top: 0;*/
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        background: var(--bg-card);
+        box-shadow: var(--shadow-medium);
+        border-right: 1px solid var(--border-color);
+        transition: left 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+    .sidebar-header {
+        padding: 2rem 1.5rem 1rem;
+        background: #99ddff;
+        color: white;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+    }
+
+    .nav-item {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+        /*.nav-item:hover {
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            text-decoration: none;
+            transform: translateX(5px);
+        }*/
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+    .sidebar-toggle {
+        position: fixed;
+        /*top: 70px;*/
+        left: 20px;
+        width: 50px;
+        height: 50px;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-medium);
+        transition: all 0.3s ease;
+        z-index: 1001;
+        font-size: 1.2rem;
+    }
+
+        .sidebar-toggle:hover {
+            background: var(--secondary-teal);
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle.open {
+            left: 300px;
+        }
+
+    .sidebar-overlay {
+        position: fixed;
+        /*top: 50px;*/
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+</style>
+
+<div class="patients-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">
+                <i class="fas fa-pills"></i>
+                Navigation
+            </h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Medications" class="nav-item active">
+                <i class="fas fa-capsules"></i>
+                <span>Medications</span>
+            </a>
+            <a asp-action="Orders" class="nav-item">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </a>
+            <a asp-action="Dashboard" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="patients-content">
+            <div class="patients-header">
+                <div class="title-section">
+                    <h1 class="page-title">
+                        <i class="fas fa-capsules"></i>
+                        Medication Inventory
+                    </h1>
+                    <p class="page-subtitle">Manage pharmaceutical inventory and medication tracking</p>
+                </div>
+            </div>
+
+            <div class="container">
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">@medications.Count</div>
+                            <div class="stat-label">Total Medications</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stock">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">@inStockCount</div>
+                            <div class="stat-label">In Stock</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon low">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">@lowStockCount</div>
+                            <div class="stat-label">Low Stock</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expiring">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">@expiringCount</div>
+                            <div class="stat-label">Expiring Soon</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-form">
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search medications..." />
+                        </div>
+                        <div class="col-md-3">
+                            <select name="scheduleFilter" id="scheduleFilter" class="form-control">
+                                <option value="">All Schedules</option>
+                                <option value="Schedule 1">Schedule 1</option>
+                                <option value="Schedule 2">Schedule 2</option>
+                                <option value="Schedule 3">Schedule 3</option>
+                                <option value="Schedule 4">Schedule 4</option>
+                                <option value="Schedule 5">Schedule 5</option>
+                                <option value="Schedule 6">Schedule 6</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="stockFilter" id="stockFilter" class="form-control">
+                                <option value="">All Stock Levels</option>
+                                <option value="instock">In Stock</option>
+                                <option value="lowstock">Low Stock</option>
+                                <option value="outofstock">Out of Stock</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="expiryFilter" id="expiryFilter" class="form-control">
+                                <option value="">All</option>
+                                <option value="expiring">Expiring Soon</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medications Table -->
+                <div class="patients-cards-container">
+                    <div class="cards-header">
+                        <h3>
+                            <i class="fas fa-list"></i>
+                            Medication Records
+                            <small id="results-count" class="text-muted" style="font-size: 0.8rem; margin-left: 0.5rem;">
+                                (@Model.Count() medications)
+                            </small>
+                        </h3>
+
+                        <div class="header-right">
+                            <a asp-action="CreateMedication" class="btn btn-primary add-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Medication</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="table-container" id="searchResults">
+                        <table class="patients-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-capsules"></i>
+                                            Medication Name
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Schedule
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-boxes"></i>
+                                            Quantity
+                                        </span>
+                                    </th>
+                                    <th>
+                                        <span class="th-content">
+                                            <i class="fas fa-calendar-times"></i>
+                                            Expiry Date
+                                        </span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span class="th-content">
+                                            <i class="fas fa-cog"></i>
+                                            Actions
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var med in medications)
+                                {
+                                    var isExpiring = med.ExpiryDate <= threeMonthsFromNow;
+                                    var isExpired = med.ExpiryDate <= today;
+                                    var isLowStock = med.Quantity <= 50 && med.Quantity > 0;
+                                    var isOutOfStock = med.Quantity == 0;
+
+                                    <tr class="patient-row medication-row @(isExpired ? "expired-row" : "") @(isOutOfStock ? "out-of-stock-row" : "")"
+                                        data-schedule="@med.Schedule"
+                                        data-quantity="@med.Quantity"
+                                        data-expiry="@med.ExpiryDate.ToString("yyyy-MM-dd")"
+                                        data-is-expiring="@isExpiring.ToString().ToLower()"
+                                        data-is-expired="@isExpired.ToString().ToLower()"
+                                        data-is-low-stock="@isLowStock.ToString().ToLower()"
+                                        data-is-out-of-stock="@isOutOfStock.ToString().ToLower()">
+                                        <td>
+                                            <div class="patient-info">
+                                                <div class="medication-icon">
+                                                    <i class="fas fa-pills"></i>
+                                                </div>
+                                                <div class="patient-details">
+                                                    <div class="patient-name">
+                                                        @med.Name
+                                                        @if (isExpired)
+                                                        {
+                                                            <span class="alert-badge expired">
+                                                                <i class="bi bi-x-circle"></i> Expired
+                                                            </span>
+                                                        }
+                                                        else if (isExpiring)
+                                                        {
+                                                            <span class="alert-badge expiring">
+                                                                <i class="bi bi-exclamation-circle"></i> Expiring Soon
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="schedule-badge">
+                                                <i class="bi bi-calendar-check"></i>
+                                                @med.Schedule
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (isOutOfStock)
+                                            {
+                                                <span class="quantity-badge out-of-stock">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                    Out of Stock
+                                                </span>
+                                            }
+                                            else if (isLowStock)
+                                            {
+                                                <span class="quantity-badge low-stock">
+                                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                                    @med.Quantity units
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="quantity-badge in-stock">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    @med.Quantity units
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="expiry-date @(isExpired ? "expired" : isExpiring ? "expiring" : "")">
+                                                <i class="bi bi-calendar3"></i>
+                                                @med.ExpiryDate.ToString("MMM dd, yyyy")
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <a asp-action="EditMedication" asp-route-id="@med.MedicationId"
+                                                   class="action-btn edit-btn"
+                                                   title="Edit Medication">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="javascript:void(0);"
+                                                   class="action-btn delete-btn"
+                                                   data-bs-toggle="modal"
+                                                   data-bs-target="#deleteModal"
+                                                   data-id="@med.MedicationId"
+                                                   data-name="@med.Name"
+                                                   title="Delete Medication">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete medication <strong id="deleteMedicationName"></strong>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mainContent = document.getElementById('mainContent');
+
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+        sidebarToggle.classList.toggle('open');
+
+        if (window.innerWidth > 768) {
+            mainContent.classList.toggle('sidebar-open');
+        }
+    });
+
+    sidebarOverlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+        sidebarToggle.classList.remove('open');
+        mainContent.classList.remove('sidebar-open');
+    });
+
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+            mainContent.classList.remove('sidebar-open');
+        }
+    });
+
+    // Delete functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        let deleteMedicationId = null;
+        let deleteRow = null;
+
+        const deleteModal = document.getElementById('deleteModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                deleteMedicationId = button.getAttribute('data-id');
+                const medicationName = button.getAttribute('data-name');
+
+                document.getElementById('deleteMedicationName').textContent = medicationName;
+                deleteRow = button.closest('tr');
+            });
+
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (!deleteMedicationId) return;
+
+                fetch(`/Pharmacist/DeleteMedication/${deleteMedicationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        if (deleteRow){
+                            deleteRow.remove();
+                        }
+                        const modalInstance = bootstrap.Modal.getInstance(deleteModal);
+                        modalInstance.hide();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'Medication successfully deleted.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        throw new Error('Delete failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to delete medication.'
+                    });
+                });
+            });
+        }
+    });
+
+    // Search and filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const scheduleFilter = document.getElementById('scheduleFilter');
+        const stockFilter = document.getElementById('stockFilter');
+        const expiryFilter = document.getElementById('expiryFilter');
+        const rows = document.querySelectorAll('.medication-row');
+
+        function performFilter() {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            const scheduleValue = scheduleFilter ? scheduleFilter.value : '';
+            const stockValue = stockFilter ? stockFilter.value : '';
+            const expiryValue = expiryFilter ? expiryFilter.value : '';
+            const today = new Date().toISOString().split('T')[0];
+            const threeMonthsFromNow = new Date();
+            threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+            const threeMonthsFromNowStr = threeMonthsFromNow.toISOString().split('T')[0];
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const schedule = row.getAttribute('data-schedule');
+                const quantity = parseInt(row.getAttribute('data-quantity'));
+                const expiryDate = row.getAttribute('data-expiry');
+                const isExpired = row.getAttribute('data-is-expired') === 'true';
+                const isExpiring = row.getAttribute('data-is-expiring') === 'true';
+                const isLowStock = row.getAttribute('data-is-low-stock') === 'true';
+                const isOutOfStock = row.getAttribute('data-is-out-of-stock') === 'true';
+
+                // Text search
+                const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+
+                // Schedule filter
+                const matchesSchedule = scheduleValue === '' || schedule === scheduleValue;
+
+                // Stock filter
+                let matchesStock = true;
+                if (stockValue === 'instock') {
+                    matchesStock = quantity > 0 && !isLowStock;
+                } else if (stockValue === 'lowstock') {
+                    matchesStock = isLowStock;
+                } else if (stockValue === 'outofstock') {
+                    matchesStock = isOutOfStock;
+                }
+
+                // Expiry filter
+                let matchesExpiry = true;
+                if (expiryValue === 'expiring') {
+                    matchesExpiry = isExpiring && !isExpired;
+                } else if (expiryValue === 'expired') {
+                    matchesExpiry = isExpired;
+                }
+
+                // Show/hide based on all filters
+                if (matchesSearch && matchesSchedule && matchesStock && matchesExpiry) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update results count
+            const resultsCount = document.getElementById('results-count');
+            if (resultsCount) {
+                resultsCount.textContent = `(${visibleCount} medications)`;
+            }
+        }
+
+        // Event listeners for all filters
+        if (searchInput) {
+            searchInput.addEventListener('input', performFilter);
+        }
+        if (scheduleFilter) {
+            scheduleFilter.addEventListener('change', performFilter);
+        }
+        if (stockFilter) {
+            stockFilter.addEventListener('change', performFilter);
+        }
+        if (expiryFilter) {
+            expiryFilter.addEventListener('change', performFilter);
+        }
+
+        // Add animation on load
+        rows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+        });
+    });
+</script>

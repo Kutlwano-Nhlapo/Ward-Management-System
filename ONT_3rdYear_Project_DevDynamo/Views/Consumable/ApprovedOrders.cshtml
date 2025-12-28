@@ -1,0 +1,107 @@
+@model IEnumerable<ONT_3rdyear_Project.Models.Order>
+
+@{
+    ViewData["Title"] = "Approved Orders";
+}
+ <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+
+<div class="dashboard-wrapper">
+    <div class="container">
+             <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+           
+                     <h1><i class="bi bi-list-check me-2"></i>Approve Requests</h1>
+                
+                <div class="d-flex gap-2">                   
+                        <a asp-controller="Consumable" asp-action="Dashboard" class="back-button">
+                            <i class="bi bi-arrow-left"></i>
+                            Back
+                        </a>
+                </div>
+            </div>
+        </div>
+        @if (Model.Any())
+        {
+        <div class="orders-table-wrapper">           
+            <div class="table-responsive">
+                <table class="table orders-table mb-0">      
+                <thead>
+                    <tr>
+                        <th>Ward</th>
+                        <th>Date</th>
+                        <th>Requested By</th>
+                        <th>Consumables</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                
+                    @foreach (var req in Model)
+                    {
+                    
+                        <tr>  
+                            @if(req.Status == "Approved")
+                            {
+                            <td> <span class="ward-badge"><i class="bi bi-hospital me-1"></i>@req.Ward.Name</span></td>
+                            <td><span class="date-badge"><i class="bi bi-calendar3 me-1"></i>@req.OrderDate.ToString("MMM dd, yyyy")</span></td>
+                            <td>@req.User.FullName</td>
+                            <td class="mb-2">                             
+                                                            
+                                <ul class="consumable-list">
+                                    
+                                    @foreach (var item in req.ConsumableOrders)
+                                    {
+                                        <li class="mb-2"> 
+                                                <span class="consumable-name"> <strong>@item.Consumable?.Name</strong></span>
+                                                <span class="consumable-qty "><i class="bi bi-box-seam me-1 text-dark"> <small>Requested: @item.QuantityRequested</small></i> Approved: @(item.QuantityApproved)<i class="bi bi-arrow-down-short"></i></span>
+                                            
+                                            
+                                            
+                                        </li>
+                                    }
+                                </ul>
+                               
+                            </td>
+                            <td>
+                                @{
+                                    var items = req.ConsumableOrders.ToList();
+                                }
+                                <form asp-controller="Consumable" asp-action="ApproveRequest" method="post" class="approval-form">
+                                    <input type="hidden" name="RequestId" value="@req.OrderID" />
+
+                                    @for (int i = 0; i < items.Count; i++)
+                                    {
+                                        <div class="mb-2">
+                                        <!-- Hidden IDs -->
+                                            <input type="hidden" asp-for="@items[i].OrderId" />
+                                            <input type="hidden" asp-for="@items[i].ConsumableId" />
+                                        </div>
+                                    }
+
+                                    <!-- Buttons side by side -->
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" name="type" value="2" class="btn btn-success btn-sm flex-fill">
+                                            Deliver
+                                        </button>
+                                        <button type="submit" name="type" value="1" class="btn btn-danger btn-sm flex-fill">
+                                            Reject
+                                        </button>
+                                    </div>
+                                </form>
+                            </td>
+                            }
+                        
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+        </div>
+        
+        }
+        else
+        {
+            <p>No approved requests yet.</p>
+        }
+    </div>
+</div>

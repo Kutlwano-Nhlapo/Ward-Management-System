@@ -1,0 +1,107 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.ViewModels.PatientDashboardViewModel>
+@{
+    var medicationController = User.IsInRole("Sister") ? "NurseSister" : "Nurse";
+}
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="4" class="text-center">No results found.</td>
+    </tr>
+}
+else
+{
+    @foreach (var patient in Model)
+                {
+                    <tr class="patient-row">
+                        <td>
+                            <div class="patient-info">
+                                <div class="patient-avatar">
+                                    @(patient.FirstName?.Substring(0, 1))@(patient.LastName?.Substring(0, 1))
+                                </div>
+                                <div class="patient-details">
+                                    <div class="patient-name">@patient.FirstName @patient.LastName</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (patient.Status == "Discharged")
+                            {
+                                <span class="detail-value">N/A</span>
+                            }
+                            else
+                            {
+                                <span class="ward-badge">@patient.WardName</span>
+                            }
+                        </td>
+                        <td>
+                            @if (patient.Status == "Discharged")
+                            {
+                                <span class="detail-value">N/A</span>
+                            }
+                            else
+                            {
+                                <span class="bed-badge">Bed @patient.BedNo</span>
+                            }
+                        </td>
+                        <td>
+                            @switch (patient.Status)
+                            {
+                                case "Admitted":
+                                    <span class="badge bg-success">Admitted</span>
+                                    break;
+                                case "Discharged":
+                                    <span class="badge bg-secondary">Discharged</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-danger">Not Admitted</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                               @*  <a asp-controller="Nurse" asp-action="ViewAdvice" asp-route-patientId="@patient.PatientID" class="action-btn btn-view-instructions"
+                                   onclick="return checkAdmission(@(patient.Status == "Admitted" ? "true" : "false"))">
+                                    <i class="fas fa-eye"></i>
+                                    <span>View Advice</span>
+                                </a> *@
+                            <div class="notification-wrapper" style="position: relative; display: inline-block;">
+                                <a asp-controller="Nurse" asp-action="ViewAdvice" asp-route-patientId="@patient.PatientID"
+                                   class="action-btn btn-view-instructions"
+                                   onclick="return checkAdmission(@(patient.Status == "Admitted" ? "true" : "false"));">
+                                    <i class="fas fa-eye"></i>
+                                    <span>View Advice</span>
+                                </a>
+
+                                <!-- Notification badge with clock icon -->
+                                @if (patient.UnreadAdviceCount > 0)
+                                {
+                                    <span class="notification-badge" id="badge-@patient.PatientID">
+                                        <i class="fa-solid fa-bell" style="margin-right: 2px;"></i>
+                                        @patient.UnreadAdviceCount
+                                    </span>
+                                }
+                            </div>
+                                <a asp-controller="Nurse" asp-action="CreateVital" asp-route-patientId="@patient.PatientID" class="action-btn btn-vitals">
+                                    <i class="fas fa-heartbeat"></i>
+                                    <span>Vitals</span>
+                                </a>
+                                <a asp-controller="Nurse" asp-action="CreateTreatment" asp-route-patientId="@patient.PatientID" class="action-btn btn-treatment"
+                                   onclick="return checkAdmission(@(patient.Status == "Admitted" ? "true" : "false"))">
+                                    <i class="fas fa-user-md"></i>
+                                    <span>Treatment</span>
+                                </a>
+                                <a asp-controller="NurseSister" asp-action="CreateAdminister" asp-route-patientId="@patient.PatientID" class="action-btn btn-medication"
+                                   onclick="return checkAdmission(@(patient.Status == "Admitted" ? "true" : "false"))">
+                                    <i class="fas fa-pills"></i>
+                                    <span>Medication</span>
+                                </a>
+                                <a asp-controller="Nurse" asp-action="CreateRequest" asp-route-patientId="@patient.PatientID" class="action-btn btn-instructions"
+                                   onclick="return checkAdmission(@(patient.Status == "Admitted" ? "true" : "false"))">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    <span>Request Advice</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+}

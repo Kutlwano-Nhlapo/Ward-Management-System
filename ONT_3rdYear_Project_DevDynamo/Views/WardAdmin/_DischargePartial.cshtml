@@ -1,0 +1,154 @@
+﻿@model ONT_3rdyear_Project.Models.Admission
+@{
+	ViewData["Title"] = "Discharge Patient";
+
+    var admissionDateTime = new DateTime(
+                                Model.AdmissionDate.Year,
+                                Model.AdmissionDate.Month,
+                                Model.AdmissionDate.Day
+    );
+
+    var lengthOfStay = (DateTime.Now - admissionDateTime.Date).Days;
+}
+
+<link href="~/css/WardAdmin/_DischargePartial.css" rel="stylesheet" asp-append-version="true" />
+
+<form asp-action="Discharge" method="post" class="discharge-form" id="dischargeForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="patientId" value="@Model.PatientID" />
+
+    <div class="discharge-content p-4">
+        <!-- Patient Summary -->
+        <div class="discharge-summary">
+            <h6 class="summary-title">
+                <i class="bi bi-info-circle"></i>
+                Admission Summary
+            </h6>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-label">Patient Full Name:</span>
+                    <span class="summary-value">@Model.Patient.FirstName @Model.Patient.LastName</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Admission Date:</span>
+                    <span class="summary-value">@Model.AdmissionDate.ToString("dd MMM yyyy")</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Length of Stay:</span>
+                    <span class="summary-value">@lengthOfStay day@(lengthOfStay != 1 ? "s" : "")</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Current Ward:</span>
+                    <span class="summary-value">@(Model.Ward?.Name ?? "Unassigned")</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Bed Number:</span>
+                    <span class="summary-value">@(Model.Bed?.BedNo ?? "N/A")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discharge Details Form -->
+        <div class="discharge-details mt-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required">
+                            <i class="bi bi-calendar3"></i>
+                            Discharge Date & Time
+                        </label>
+                        <input type="datetime-local"
+                               name="DischargeDate"
+                               class="form-control"
+                               value="@DateTime.Now.ToString(" yyyy-MM-ddTHH:mm")"
+                               required />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-person-badge"></i>
+                            Discharged By
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               value="@User.Identity.Name"
+                               readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <label class="form-label required">
+                    <i class="bi bi-file-text"></i>
+                    Discharge Instructions
+                </label>
+                <textarea name="instructions"
+                          class="form-control discharge-instructions"
+                          rows="6"
+                          placeholder="Enter detailed discharge instructions, medications, follow-up appointments, and care recommendations..."
+                          required></textarea>
+                <div class="instruction-help mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-lightbulb"></i>
+                        Include medications, follow-up appointments, activity restrictions, and emergency contact information.
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <label class="form-label">
+                    <i class="bi bi-chat-square-text"></i>
+                    Additional Notes
+                </label>
+                <textarea name="additionalNotes"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Any additional notes or special instructions (optional)..."></textarea>
+            </div>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="discharge-warning mt-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>
+                <strong>Important:</strong>
+                <p class="mb-0">Once discharged, the bed will be freed and all active doctor assignments will be deactivated.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i>
+            Cancel
+        </button>
+        <button type="submit" class="btn btn-danger discharge-submit-btn" id="dischargeSubmitBtn">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="btn-text">Confirm Discharge</span>
+        </button>
+    </div>
+</form>
+
+<script>
+    document.getElementById('dischargeForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('dischargeSubmitBtn');
+        const instructions = document.querySelector('textarea[name="instructions"]').value.trim();
+
+        if (!instructions) {
+            alert('Please provide discharge instructions');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to discharge this patient?')) {
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Discharging...';
+
+        this.submit();
+    });
+</script>

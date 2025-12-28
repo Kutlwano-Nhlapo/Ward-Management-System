@@ -1,0 +1,896 @@
+﻿@model ONT_3rdyear_Project.Models.Vital
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "Add Vitals";
+}
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    /* CSS Variables matching AllPatients.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp) /* linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) */;
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: relative;
+        padding: 2rem 0;
+    }
+
+        .patients-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            /* background: var(--gradient-medical); */
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+    /* Floating background elements */
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .floating-element {
+        position: absolute;
+        background: rgba(0, 119, 190, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 70%;
+            right: 10%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-delay: 4s;
+        }
+
+    @@keyframes float {
+        0%, 100%
+
+    {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 0.3;
+    }
+
+    }
+
+    /* Header Styles */
+    .patients-header {
+        /* background: var(--bg-card); */
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        /* box-shadow: var(--shadow-light); */
+        /* position: relative; */
+        z-index: 1;
+       
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--primary-blue);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s ease;
+    }
+
+        .breadcrumb-link:hover {
+            color: var(--secondary-teal);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-link i {
+            margin-right: 0.5rem;
+        }
+
+    .breadcrumb-nav .bi-chevron-right {
+        margin: 0 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+    }
+
+        .page-title i {
+            color: var(--accent-green);
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        padding: 2rem 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form Card */
+    .vitals-form-card {
+        background: var(--bg-card);
+        border-radius: 0 0 12px 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Patient Info Card */
+    .patient-info-card {
+        background: #e6f7ff;
+        color: var(--heading-color)!important;
+        padding: 1.5rem;
+        border-radius: 12px 12px 0 0;
+        /* margin-bottom: 2rem; */
+        text-align: center;
+        box-shadow: var(--shadow-medium);
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .patient-info-card h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+    /* Form Groups */
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label-custom {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+        .form-label-custom i {
+            margin-right: 0.5rem;
+            color: var(--primary-blue);
+            width: 16px;
+            text-align: center;
+        }
+
+    .form-control {
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+        background: var(--bg-card);
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            background: white;
+            box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+    /* Input Groups with Units */
+    .input-group-custom {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-unit {
+        position: absolute;
+        right: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        pointer-events: none;
+        background: var(--bg-card);
+        padding: 0 0.25rem;
+    }
+
+    .form-control.with-unit {
+        padding-right: 3.5rem;
+    }
+
+    /* Form Row */
+    .form-row-custom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--accent-green) 0%, #34d399 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        margin-right: 1rem;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+
+    .btn-back {
+        background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
+    }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 85, 104, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+    /* Validation Messages */
+    .text-danger {
+        color: var(--danger-red) !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+    }
+
+        .text-danger::before {
+            content: "⚠Required";
+            margin-right: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+    /* Recorded By Info */
+    .recorded-by-info {
+        background: var(--primary-light);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+        .recorded-by-info i {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+
+        .recorded-by-info strong {
+            color: var(--text-primary);
+        }
+
+    /* Action Buttons Container */
+    .action-buttons {
+        text-align: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 2rem;
+    }
+
+    /* Animation */
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .vitals-form-card {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .patients-content
+
+    {
+        padding: 1rem 0;
+    }
+
+    .vitals-form-card {
+        margin: 0 1rem;
+        padding: 1.5rem;
+    }
+
+    .form-row-custom {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-save {
+        margin-right: 0;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .patients-header {
+        padding: 1rem 0;
+    }
+
+    .header-content {
+        padding: 0 1rem;
+    }
+
+    }
+
+    @@media (max-width: 576px) {
+        .vitals-form-card
+
+    {
+        margin: 0 0.5rem;
+        padding: 1rem;
+    }
+
+    }
+
+    /* Custom modal styling to match your theme */
+    .confirmation-modal .modal-header {
+        background: var(--primary-light);
+        color: white;
+        border-bottom: none;
+    }
+
+    .confirmation-modal .modal-title {
+        font-weight: 600;
+    }
+
+    .confirmation-modal .modal-body {
+        padding: 2rem;
+    }
+
+    .vital-details {
+        background: var(--primary-light);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .vital-detail-item {
+        display: flex;
+        justify-content: between;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0;
+    }
+
+    .vital-detail-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 140px;
+    }
+
+    .vital-detail-value {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .confirmation-modal .btn-confirm {
+        background: linear-gradient(135deg, var(--accent-green) 0%, #34d399 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+    }
+
+    .confirmation-modal .btn-cancel {
+        background: linear-gradient(135deg, var(--text-secondary) 0%, var(--text-primary) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+    }
+
+    /* Override Bootstrap's default link underlining */
+    a {
+        color: var(--heading-color);
+        text-decoration: none !important;
+    }
+
+        a:hover {
+            text-decoration: none !important;
+        }
+
+    /* More specific overrides for navigation */
+    .nav-link,
+    .navbar-nav a,
+    .navbar a {
+        text-decoration: none !important;
+    }
+
+        .nav-link:hover,
+        .navbar-nav a:hover,
+        .navbar a:hover {
+            text-decoration: none !important;
+        }
+</style>
+
+<div class="patients-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="patients-header">
+        
+                <div class="title-section">
+                    <h1 class="page-title">
+                        <i class="fas fa-plus-circle"></i>
+                        Record Patient Vitals
+                    </h1>
+                    <p class="page-subtitle">Add new vital signs measurement for patient care monitoring</p>
+                </div>
+            
+    </div>
+
+    <!-- Main Content -->
+    <div class="patients-content">
+        <div class="container">
+            <!-- Patient Info Card -->
+            <div class="patient-info-card">
+                <h3>
+                    <i class="fas fa-user-circle"></i>
+                    Recording vitals for: @ViewBag.PatientName
+                </h3>
+            </div>
+
+            <!-- Vitals Form Card -->
+            <div class="vitals-form-card">
+                <form id="vitalsForm" asp-action="CreateVital" method="post">
+                    <input type="hidden" asp-for="PatientID" value="@ViewBag.PatientId" />
+                    <input type="hidden" asp-for="Date" value="@DateTime.Now" />
+
+                    <!-- Patient Name (Disabled) -->
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">
+                            <i class="fas fa-user"></i>
+                            Patient
+                        </label>
+                        <input type="text" class="form-control" value="@ViewBag.PatientName" disabled />
+                    </div>
+
+                    <!-- Vital Signs Grid -->
+                    <div class="form-row-custom">
+                        <!-- Blood Pressure -->
+                        <div class="form-group-custom">
+                            <label asp-for="BP" class="form-label-custom">
+                                <i class="fas fa-heartbeat"></i>
+                                Blood Pressure
+                            </label>
+                            <div class="input-group-custom">
+                                @* <input asp-for="BP" class="form-control with-unit" placeholder="120/80" pattern="\d{2,3}/\d{2,3}"
+                                       title="Enter in format ###/## (e.g., 120/80)" />
+                                <span class="input-unit">mmHg</span> *@
+                                <input asp-for="BP" class="form-control with-unit"
+                                       placeholder="120/80"
+                                       pattern="\d{2,3}/\d{2,3}"
+                                       title="Enter in format ###/## (e.g., 120/80)"
+                                       data-val="true"
+                                       data-val-regex="Blood pressure must be in format ###/## (e.g., 120/80)"
+                                       data-val-regex-pattern="^\d{2,3}/\d{2,3}$" />
+                                <span class="input-unit">mmHg</span>
+                            </div>
+                            <span asp-validation-for="BP" class="text-danger"></span>
+                        </div>
+
+                        <!-- Temperature -->
+                        <div class="form-group-custom">
+                            <label asp-for="Temperature" class="form-label-custom">
+                                <i class="fas fa-thermometer-half"></i>
+                                Temperature
+                            </label>
+                            <div class="input-group-custom">
+                                <input asp-for="Temperature" class="form-control with-unit" placeholder="36.5" />
+                                <span class="input-unit">°C</span>
+                                
+                            </div>
+                            <span asp-validation-for="Temperature" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row-custom">
+                        <!-- Sugar Level -->
+                        <div class="form-group-custom">
+                            <label asp-for="SugarLevel" class="form-label-custom">
+                                <i class="fas fa-tint"></i>
+                                Sugar Level
+                            </label>
+                            <div class="input-group-custom">
+                                <input asp-for="SugarLevel" class="form-control with-unit" placeholder="6.8" />
+                                <span class="input-unit">mg/dL</span>
+                            </div>
+                            <span asp-validation-for="SugarLevel" class="text-danger"></span>
+                        </div>
+
+                        <!-- Pulse Rate -->
+                        <div class="form-group-custom">
+                            <label asp-for="PulseRate" class="form-label-custom">
+                                <i class="fas fa-heart"></i>
+                                Pulse Rate
+                            </label>
+                            <div class="input-group-custom">
+                                <input asp-for="PulseRate" class="form-control with-unit" placeholder="72" />
+                                <span class="input-unit">BPM</span>
+                            </div>
+                            <span asp-validation-for="PulseRate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Recorded By -->
+                    <div class="recorded-by-info">
+                        <i class="fas fa-user-md"></i>
+                        <span><strong>Recorded By:</strong> @ViewBag.CurrentUserName</span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        @* <button type="submit" class="btn btn-save">
+                            <i class="fas fa-save"></i>
+                            Save Vitals
+                        </button> *@
+                        <button type="button" id="saveButton" class="btn btn-save">
+                            <i class="fas fa-save"></i>
+                            Save Vitals
+                        </button>
+                        <a href="@(Url.Action("PatientsList", roles.Contains("Nurse") ? "Nurse" : "NurseSister"))"
+                           class="btn btn-back cancel-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Confirmation Modal -->
+<div class="modal fade confirmation-modal" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Confirm Vitals Submission
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please review the vital signs before saving:</p>
+
+                <div class="vital-details">
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Patient:</span>
+                        <span class="vital-detail-value" id="modalPatientName">@ViewBag.PatientName</span>
+                    </div>
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Blood Pressure:</span>
+                        <span class="vital-detail-value" id="modalBP"></span>
+                    </div>
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Temperature:</span>
+                        <span class="vital-detail-value" id="modalTemperature"></span>
+                    </div>
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Sugar Level:</span>
+                        <span class="vital-detail-value" id="modalSugarLevel"></span>
+                    </div>
+                    <div class="vital-detail-item">
+                        <span class="vital-detail-label">Pulse Rate:</span>
+                        <span class="vital-detail-value" id="modalPulseRate"></span>
+                    </div>
+                    @* <div class="vital-detail-item">
+                        <span class="vital-detail-label">Recorded By:</span>
+                        <span class="vital-detail-value">@ViewBag.CurrentUserName</span>
+                    </div> *@
+                </div>
+
+                <p class="mt-3"><strong>Are you sure you want to save these vital signs?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>No, Go Back
+                </button>
+                <button type="button" class="btn btn-confirm" id="confirmSave">
+                    <i class="fas fa-check me-2"></i>Yes, Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetUrl = this.getAttribute('href');
+
+                Swal.fire({
+                    title: 'Discard changes?',
+                    text: "Any unsaved data will be lost.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, go back',
+                    cancelButtonText: 'Stay here'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = targetUrl;
+                    }
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const saveButton = document.getElementById('saveButton');
+            const confirmSaveButton = document.getElementById('confirmSave');
+            const vitalsForm = document.getElementById('vitalsForm');
+            const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+
+            // Save button click handler
+            saveButton.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Manually validate each field and show validation messages
+                let allValid = true;
+
+                // Get all form inputs
+                const bpInput = document.querySelector('input[name="BP"]');
+                const temperatureInput = document.querySelector('input[name="Temperature"]');
+                const sugarLevelInput = document.querySelector('input[name="SugarLevel"]');
+                const pulseRateInput = document.querySelector('input[name="PulseRate"]');
+
+                // Clear previous validation
+                document.querySelectorAll('.text-danger').forEach(span => {
+                    span.style.display = 'none';
+                });
+
+                // Validate BP
+                if (!bpInput.value.trim()) {
+                    allValid = false;
+                    const validationSpan = bpInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                } else if (!bpInput.validity.valid) {
+                    allValid = false;
+                    const validationSpan = bpInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                }
+
+                // Validate Temperature
+                if (!temperatureInput.value.trim()) {
+                    allValid = false;
+                    const validationSpan = temperatureInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                }
+
+                // Validate Sugar Level
+                if (!sugarLevelInput.value.trim()) {
+                    allValid = false;
+                    const validationSpan = sugarLevelInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                }
+
+                // Validate Pulse Rate
+                if (!pulseRateInput.value.trim()) {
+                    allValid = false;
+                    const validationSpan = pulseRateInput.closest('.form-group-custom').querySelector('.text-danger');
+                    if (validationSpan) {
+                        validationSpan.style.display = 'flex';
+                    }
+                }
+
+                if (!allValid) {
+                    // Show error message for incomplete form
+                    Swal.fire({
+                        title: 'Incomplete Form',
+                        text: 'Please fill in all required fields with valid data.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                // If all valid, populate modal with data and show it
+                populateModalWithData();
+                confirmationModal.show();
+            });
+
+            // Confirm save button handler
+            confirmSaveButton.addEventListener('click', function () {
+                // Submit the form
+                vitalsForm.submit();
+            });
+
+            // Populate modal with form data
+            function populateModalWithData() {
+                document.getElementById('modalBP').textContent = document.querySelector('input[name="BP"]').value + ' mmHg';
+                document.getElementById('modalTemperature').textContent = document.querySelector('input[name="Temperature"]').value + ' °C';
+                document.getElementById('modalSugarLevel').textContent = document.querySelector('input[name="SugarLevel"]').value + ' mg/dL';
+                document.getElementById('modalPulseRate').textContent = document.querySelector('input[name="PulseRate"]').value + ' BPM';
+            }
+
+            // Hide validation messages when user starts typing
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const validationSpan = this.closest('.form-group-custom')?.querySelector('.text-danger');
+                    if (validationSpan && this.value.trim()) {
+                        validationSpan.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

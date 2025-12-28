@@ -1,0 +1,28 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.PatientAllergy>
+@{
+    int patientId = ViewBag.PatientId;
+}
+@if (!Model.Any())
+{
+    <p>No allergies recorded.</p>
+    <form id="addAllergyForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="PatientId" value="@patientId" />
+        <div class="mb-3">
+            <label>Allergy Name</label>
+            <input name="Name" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-danger">Add</button>
+    </form>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var a in Model)
+        {
+            <li class="list-group-item">
+                <strong>@a.Allergy?.Name</strong> - @a.Severity
+            </li>
+        }
+    </ul>
+}

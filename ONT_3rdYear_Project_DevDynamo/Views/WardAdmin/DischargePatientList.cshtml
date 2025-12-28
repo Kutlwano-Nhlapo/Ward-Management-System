@@ -1,0 +1,664 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Admission>
+@{
+    ViewData["Title"] = "Discharge Patients";
+    var totalPatients = Model.Count();
+    var todayDischarges = 0;
+    var avgLengthOfStay = 7;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/WardAdmin/discharge.css" asp-append-version="true" />
+
+<div class="discharge-wrapper">
+    <!-- Header Section -->
+    <div class="discharge-header">
+        <div class="header-content">
+            <div class="back-navigation">
+                <a asp-action="Index" class="btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="discharge-title-section">
+                <h1 class="discharge-title">
+                    <i class="bi bi-door-open"></i>
+                    Patient Discharge Management
+                </h1>
+                <p class="discharge-subtitle">Process patient discharges with complete documentation</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline-secondary" onclick="exportDischargeData()">
+                    <i class="bi bi-download"></i>
+                    Export
+                </button>
+                <button class="btn btn-primary" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show success-notification" role="alert">
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="notification-message">
+                    <strong>Success!</strong>
+                    <p class="mb-0">@TempData["Success"]</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show error-notification" role="alert">
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="notification-message">
+                    <strong>Error!</strong>
+                    <p class="mb-0">@TempData["Error"]</p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Statistics Dashboard -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card ready-discharge">
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@totalPatients</h3>
+                    <p class="stat-label">Ready for Discharge</p>
+                </div>
+            </div>
+            <div class="stat-card today-discharges">
+                <div class="stat-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number pulse">@todayDischarges</h3>
+                    <p class="stat-label">Scheduled Today</p>
+                </div>
+            </div>
+            <div class="stat-card avg-stay">
+                <div class="stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">@avgLengthOfStay</h3>
+                    <p class="stat-label">Avg. Length of Stay (days)</p>
+                </div>
+            </div>
+            <div class="stat-card pending-docs">
+                <div class="stat-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">3</h3>
+                    <p class="stat-label">Pending Documentation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="search-section">
+                <div class="search-input-group">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="patientSearch" class="search-input" placeholder="Search by patient name, ward, or bed..." />
+                    <button class="search-clear" onclick="clearSearch()" style="display: none;">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label class="filter-label">Ward Filter:</label>
+                    <select class="filter-select" id="wardFilter" onchange="filterByWard()">
+                        <option value="">All Wards</option>
+                        @{
+                            var wards = Model.Select(a => a.Ward?.Name ?? "Unassigned").Distinct().ToList();
+                        }
+                        @foreach (var ward in wards)
+                        {
+                            <option value="@ward">@ward</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Length of Stay:</label>
+                    <select class="filter-select" id="stayFilter" onchange="filterByStay()">
+                        <option value="">All Patients</option>
+                        <option value="short">Short Stay (1-3 days)</option>
+                        <option value="medium">Medium Stay (4-7 days)</option>
+                        <option value="long">Long Stay (8+ days)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Priority:</label>
+                    <select class="filter-select" id="priorityFilter" onchange="filterByPriority()">
+                        <option value="">All Priorities</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="normal">Normal</option>
+                        <option value="routine">Routine</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="discharge-content">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3 class="empty-state-title">No Patients Ready for Discharge</h3>
+                <p class="empty-state-description">
+                    There are currently no admitted patients ready for discharge. Patients will appear here when they are ready to be discharged.
+                </p>
+                <a class="btn btn-primary" asp-action="AllPatients">
+                    <i class="bi bi-people"></i>
+                    View All Patients
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Patients Table -->
+            <div class="table-section">
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="bi bi-list-check"></i>
+                        Patients Ready for Discharge
+                    </h3>
+                </div>
+
+                <div class="table-container">
+                    <table class="discharge-table" id="dischargeTable">
+                        <thead>
+                            <tr>                                
+                                <th class="sortable" data-sort="patient">
+                                    <i class="bi bi-person"></i>
+                                    Patient Name
+                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-sort="dob">
+                                    Date of Birth
+                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-sort="ward">
+                                    <i class="bi bi-building"></i>
+                                    Ward & Bed
+                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-sort="admission">
+                                    Admission Info
+                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                </th>
+                                <th class="sortable" data-sort="stay">
+                                    Length of Stay
+                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                </th>
+                                <th class="actions-column">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var admission in Model)
+                            {
+                                var admissionDateTime = new DateTime(
+                                admission.AdmissionDate.Year,
+                                admission.AdmissionDate.Month,
+                                admission.AdmissionDate.Day
+                                );
+
+                                var lengthOfStay = (DateTime.Now.Date - admissionDateTime.Date).Days;
+
+                                var dob = admission.Patient?.DateOfBirth ?? DateTime.MinValue;
+                                var age = DateTime.Now.Year - dob.Year;
+                                if (dob != DateTime.MinValue && DateTime.Now.Date < dob.AddYears(age).Date)
+                                {
+                                    age--;
+                                }
+
+                                var stayCategory = lengthOfStay <= 3 ? "short"
+                                : lengthOfStay <= 7 ? "medium"
+                                : "long";
+
+                                var priority = lengthOfStay >= 10 ? "urgent"
+                                : lengthOfStay >= 5 ? "normal"
+                                : "routine";
+
+                              
+                                <tr class="patient-row"
+                                    data-patient="@admission.Patient.FirstName @admission.Patient.LastName"
+                                    data-ward="@(admission.Ward?.Name ?? "Unassigned")"
+                                    data-stay="@stayCategory"
+                                    data-patient-id="@admission.PatientID">
+
+                                    <td class="patient-cell">
+                                        <div class="patient-info">
+                                            <div class="patient-avatar">
+                                                <i class="bi bi-person-circle"></i>
+                                            </div>
+                                            <div class="patient-details">
+                                                <div class="patient-name">@admission.Patient.FirstName @admission.Patient.LastName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="dob-cell">
+                                        <div class="dob-info">
+                                            <div class="dob-date">@admission.Patient.DateOfBirth.ToString("MMM dd, yyyy")</div>
+                                            <div class="patient-age">@age years old</div>
+                                        </div>
+                                    </td>
+                                    <td class="ward-cell">
+                                        <div class="ward-info">
+                                            <div class="ward-details">
+                                                <i class="bi bi-building text-primary"></i>
+                                                <span class="ward-name">@(admission.Ward?.Name ?? "Unassigned")</span>
+                                            </div>
+                                            <div class="bed-details">
+                                                <i class="bi bi-hospital text-info"></i>
+                                                <span class="bed-number">Bed @(admission.Bed?.BedNo ?? "N/A")</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="admission-cell">
+                                        <div class="admission-info">
+                                            <div class="admission-date">
+                                                <i class="bi bi-calendar-plus text-success"></i>
+                                                <span>@admission.AdmissionDate.ToString("dd MMM yyyy")</span>
+                                            </div>
+                                            @* <div class="admission-time">@admission.AdmissionDate.ToString("h:mm tt")</div> *@
+                                        </div>
+                                    </td>
+                                    <td class="stay-cell">
+                                         <div class="stay-info">
+                                            <div class="stay-duration stay-@stayCategory">
+                                                <strong>@lengthOfStay</strong> day@(lengthOfStay != 1 ? "s" : "")
+                                            </div>
+                                            <div class="stay-category">@stayCategory.ToUpper() STAY</div>
+                                        </div> 
+                                    </td>
+                                    <td class="actions-cell">
+                                        <div class="action-buttons">
+                                            <button class="action-btn btn-discharge"
+                                                    onclick="dischargePatient(@admission.PatientID)"
+                                                    title="Discharge Patient">
+                                                <i class="bi bi-box-arrow-right"></i>
+                                                <span>Discharge</span>
+                                            </button>
+                                            <button class="action-btn btn-info"
+                                                    onclick="viewPatientInfo(@admission.PatientID)"
+                                                    title="View Patient Info">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                            <button class="action-btn btn-history"
+                                                    onclick="viewAdmissionHistory(@admission.PatientID)"
+                                                    title="View History">
+                                                <i class="bi bi-clock-history"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Patient Info Modal -->
+<div class="modal fade" id="patientInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-lines-fill"></i>
+                    Patient Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="patientInfoContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Discharge Patient Modal -->
+<div class="modal fade" id="dischargeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="dischargeModalLabel">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Discharge Patient
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="dischargeModalBody">
+                <!-- Partial view will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+           document.addEventListener('DOMContentLoaded', function() {
+            // Initialize search functionality
+            initializeSearch();
+
+            // Initialize table sorting
+            initializeTableSorting();
+
+            // Auto-dismiss notifications
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        function initializeSearch() {
+            const searchInput = document.getElementById('patientSearch');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filterPatients(searchTerm);
+                updateSearchClearButton();
+            });
+        }
+
+        function filterPatients(searchTerm) {
+            const rows = document.querySelectorAll('.patient-row');
+
+            rows.forEach(row => {
+                const patientName = row.dataset.patient.toLowerCase();
+                const wardName = row.dataset.ward.toLowerCase();
+                const bedText = row.querySelector('.bed-number').textContent.toLowerCase();
+
+                if (patientName.includes(searchTerm) ||
+                    wardName.includes(searchTerm) ||
+                    bedText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function updateSearchClearButton() {
+            const searchInput = document.getElementById('patientSearch');
+            const clearButton = document.querySelector('.search-clear');
+
+            if (searchInput.value.length > 0) {
+                clearButton.style.display = 'block';
+            } else {
+                clearButton.style.display = 'none';
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('patientSearch').value = '';
+            filterPatients('');
+            updateSearchClearButton();
+        }
+
+        function filterByWard() {
+            const wardFilter = document.getElementById('wardFilter').value;
+            const rows = document.querySelectorAll('.patient-row');
+
+            rows.forEach(row => {
+                if (wardFilter === '' || row.dataset.ward === wardFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByStay() {
+            const stayFilter = document.getElementById('stayFilter').value;
+            const rows = document.querySelectorAll('.patient-row');
+
+            rows.forEach(row => {
+                if (stayFilter === '' || row.dataset.stay === stayFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByPriority() {
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const rows = document.querySelectorAll('.patient-row');
+
+            rows.forEach(row => {
+                if (priorityFilter === '' || row.dataset.priority === priorityFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function initializeTableSorting() {
+            const sortableHeaders = document.querySelectorAll('.sortable');
+
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', () => sortTable(header));
+            });
+        }
+
+        function sortTable(header) {
+            // Table sorting logic here
+            console.log('Sorting by:', header.dataset.sort);
+        }
+
+        function viewPatientInfo(patientId) {
+            const modal = new bootstrap.Modal(document.getElementById('patientInfoModal'));
+            const content = document.getElementById('patientInfoContent');
+
+            content.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div><p class="mt-2">Loading patient information...</p></div>';
+            modal.show();
+
+            // Simulate loading patient data
+            setTimeout(() => {
+                content.innerHTML = `
+                    <div class="patient-info-content">
+                        <h6>Patient Summary</h6>
+                        <p>Detailed patient information would be loaded here...</p>
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        function viewAdmissionHistory(patientId) {
+            alert(`Viewing admission history for patient ${patientId}`);
+        }
+
+        function previewDischarge(patientId) {
+            alert(`Preview discharge documentation for patient ${patientId}`);
+        }
+
+        function loadModal(url) {
+            const modal = new bootstrap.Modal(document.getElementById('dischargeModal'));
+            const modalBody = document.getElementById('dischargeModalBody');
+
+            // Show loading state
+            modalBody.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading discharge form...</p>
+                </div>
+            `;
+
+            modal.show();
+
+            // Fetch the partial view
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load discharge form');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    modalBody.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    modalBody.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Error</strong>
+                            <p class="mb-0">Failed to load discharge form. Please try again.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        function dischargePatient(patientId){
+            loadModal(`/WardAdmin/DischargePatient/${patientId}`, 'dischargeModal','dischargeModalBody');
+        }
+
+        function showToast(message, type = 'success') {
+            // Create toast container
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1056';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Create toast element
+            const toastId = 'toast-' + Date.now();
+            const bgClass = type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-success';
+            const iconClass = type === 'error' ? 'bi-exclamation-triangle' : type === 'warning' ? 'bi-exclamation-circle' : 'bi-check-circle';
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${iconClass} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: type === 'error' ? 5000 : 3000
+            });
+
+            toast.show();
+
+            // Remove toast element after it's hidden
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
+
+        function refreshData() {
+            const btn = document.querySelector('[onclick="refreshData()"]');
+            const originalContent = btn.innerHTML;
+
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Refreshing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                showNotification('Data refreshed successfully!', 'success');
+            }, 2000);
+        }
+
+        function exportDischargeData() {
+            showNotification('Export started! Download will begin shortly.', 'info');
+
+            // Simulate export
+            setTimeout(() => {
+                const data = { exportDate: new Date().toISOString(), patients: @(Model.Count()) };
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `discharge-list-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+
+                URL.revokeObjectURL(url);
+                showNotification('Discharge data exported successfully!', 'success');
+            }, 1000);
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show notification-toast`;
+            notification.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Form submission handling
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('discharge-form')) {
+                const submitBtn = e.target.querySelector('.discharge-submit-btn');
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            }
+        });
+
+        // Add spin animation
+        const style = document.createElement('style');
+        style.textContent = '.spin { animation: spin 1s linear infinite; } @@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+    </script>
+}

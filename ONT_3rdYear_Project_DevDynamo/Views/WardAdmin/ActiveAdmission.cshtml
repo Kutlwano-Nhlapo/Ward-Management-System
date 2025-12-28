@@ -1,0 +1,301 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.Admission>
+
+@{
+    ViewData["Title"] = "Active Admissions";
+    var totalAdmissions = Model.Count();
+    var todayAdmissions = Model.Count(a => a.AdmissionDate == DateOnly.FromDateTime(DateTime.Today));
+    var wardCount = Model.Select(a => a.WardID).Distinct().Count();
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="~/css/WardAdmin/ActiveAdmission.css" rel="stylesheet" asp-append-version="true">
+
+<div class="active-admissions-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="admissions-header">
+            <div class="back-button">
+                <a asp-action="Index" asp-controller="WardAdmin" class="btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stat-number">@totalAdmissions</div>
+                    <div class="stat-label">Total Active Admissions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-day"></i>
+                    </div>
+                    <div class="stat-number">@todayAdmissions</div>
+                    <div class="stat-label">Today's Admissions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="stat-number">@wardCount</div>
+                    <div class="stat-label">Active Wards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div class="stat-number">@Model.Average(a => (DateTime.Today - a.AdmissionDate.ToDateTime(TimeOnly.MinValue)).Days)d</div>
+                    <div class="stat-label">Avg. Stay Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admissions Container -->
+        <div class="admissions-container">
+            <div class="admissions-header">
+                <h4>
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    Currently Admitted Patients
+                </h4>
+            </div>
+            <div class="admissions-body">
+                <!-- Alerts -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert-container">
+                        <div class="alert alert-success">
+                            <div class="alert-content">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <div>@TempData["Success"]</div>
+                            </div>
+                            <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert-container">
+                        <div class="alert alert-danger">
+                            <div class="alert-content">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <div>@TempData["Error"]</div>
+                            </div>
+                            <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                @if (!Model.Any())
+                {
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-hospital display-1 text-primary mb-3"></i>
+                        <h3 class="text-muted">No Active Admissions</h3>
+                        <p class="text-muted">There are currently no patients admitted to any wards.</p>
+                        <a asp-action="AdmitPatientStep1" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i>
+                            Admit First Patient
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table admissions-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <i class="bi bi-person"></i>
+                                        Patient
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-calendar"></i>
+                                        Date of Birth
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-building"></i>
+                                        Ward
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-bed"></i>
+                                        Bed
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-calendar-plus"></i>
+                                        Admission Date
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-clipboard-plus"></i>
+                                        Reason
+                                    </th>
+                                    <th>
+                                        <i class="bi bi-person-badge"></i>
+                                        Doctor
+                                    </th>
+                                    <th class="text-center">
+                                        <i class="bi bi-gear"></i>
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var admission in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="patient-info">
+                                                <div class="patient-avatar">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                                <div class="patient-details">
+                                                    <div class="patient-name">
+                                                        @admission.Patient.FirstName @admission.Patient.LastName
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="date-info">
+                                                @admission.Patient.DateOfBirth.ToString("dd/MM/yyyy")
+                                                <div class="patient-meta">
+                                                    Age: @(DateTime.Now.Year - admission.Patient.DateOfBirth.Year)
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="ward-badge">@admission.Ward.Name</span>
+                                        </td>
+                                        <td>
+                                            <span class="bed-number">@admission.Bed.BedNo</span>
+                                        </td>
+                                        <td>
+                                            @admission.AdmissionDate.ToString("yyyy-MM-dd")
+                                            <div class="patient-meta">
+                                                @((DateTime.Today - admission.AdmissionDate.ToDateTime(TimeOnly.MinValue)).Days) days ago
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="reason-text" title="@admission.ReasonForAdmission">
+                                                @(admission.ReasonForAdmission.Length > 50 ? 
+                                                  admission.ReasonForAdmission.Substring(0, 50) + "..." : 
+                                                  admission.ReasonForAdmission)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (admission.ApplicationUser != null)
+                                            {
+                                                <span class="doctor-badge">
+                                                    <i class="bi bi-person-badge"></i>
+                                                    Dr. @admission.ApplicationUser.FullName
+                                                </span>
+                                            }
+                                            @* else
+                                            {
+                                                <span class="text-muted">Not Assigned</span>
+                                            } *@
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="action-buttons">
+                                                <a asp-action="PatientAdmission" asp-route-patientId="@admission.PatientID"
+                                                   class="action-btn btn-view" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                    Details
+                                                </a>
+                                                <a asp-action="Discharge" asp-route-patientId="@admission.PatientID"
+                                                   class="action-btn btn-discharge" title="Discharge Patient">
+                                                    <i class="bi bi-box-arrow-right"></i>
+                                                    Discharge
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary Footer -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="text-muted">
+                                <small>
+                                    <i class="bi bi-info-circle"></i>
+                                    Showing @Model.Count() active admissions
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a asp-action="AdmitPatientStep1" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i>
+                                New Admission
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+
+        // Quick filter functionality
+        function filterAdmissions(filter) {
+            const rows = document.querySelectorAll('.admissions-table tbody tr');
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else if (filter === 'today') {
+                    const dateCell = row.querySelector('td:nth-child(5)');
+                    const daysAgo = dateCell.querySelector('.patient-meta')?.textContent;
+                    row.style.display = daysAgo?.includes('0 days') ? '' : 'none';
+                }
+            });
+        }
+
+        // Export functionality (would need backend implementation)
+        function exportAdmissions(format) {
+            alert(`Export functionality for ${format} format would be implemented here`);
+        }
+
+        // Print functionality
+        function printAdmissions() {
+            window.print();
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltips = [].slice.call(document.querySelectorAll('[title]'));
+            tooltips.map(function(tooltip) {
+                return new bootstrap.Tooltip(tooltip);
+            });
+        });
+    </script>
+
+}

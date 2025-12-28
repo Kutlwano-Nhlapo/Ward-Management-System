@@ -1,0 +1,371 @@
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<ONT_3rdyear_Project.Models.Prescription>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Script Dashboard";
+}
+<head>
+    <!-- Page-specific styles -->
+    <link href="/css/Script&Consumable/Consumable.css" rel="stylesheet" />
+</head>
+
+@if (User.IsInRole("ScriptManager") || User.IsInRole("Admin"))
+{
+    @* TempData alert *@
+    @if (TempData["Message"] != null)
+    {
+        <div id="autoCloseAlert" class="alert alert-info alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 1050; min-width: 250px;">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="dashboard-wrapper">
+        <div class="container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <h1>
+                        <i class="bi bi-clipboard-check"></i>
+                        Script Management Dashboard
+                    </h1>        
+                    <h4> Welcome,<strong> @((await UserManager.GetUserAsync(User))?.FullName)</strong></h4>     
+                </div>
+            </div>
+            
+
+            <!-- Statistics Overview -->
+            <div class="stats-grid">
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div class="stat-icon info">
+                            <i class="bi bi-envelope-arrow-down"></i>
+                        </div>
+                        <div class="stat-label">New prescriptions</div>
+                    </div>
+                    <div class="stat-value">@ViewBag.NewPre</div>
+                    <div class="stat-description">Awaiting review</div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                        <div class="stat-label">Prescription in Process</div>
+                    </div>
+                    <div class="stat-value">@ViewBag.Preocessing</div>
+                    <div class="stat-description">Currently being processed</div>
+                </div>
+
+                <div class="stat-card critical">
+                    <div class="stat-header">
+                        <div class="stat-icon critical">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-label">Rejected Prescriptions</div>
+                    </div>
+                    <div class="stat-value">@ViewBag.Rejected</div>
+                    <div class="stat-description">Require attention</div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-label">Approved Prescriptions</div>
+                    </div>
+                    <div class="stat-value">@ViewBag.Delivered</div>
+                    <div class="stat-description">Successfully approved</div>
+                </div>
+            </div>
+
+            <!-- Main Content Row -->
+            <div class="row">
+                <!-- Main Content Column -->
+                <div class="col-md-9">
+                    <!-- Search & Filter Section -->
+                    <div class="search-filter-section mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" placeholder="Search prescriptions..." id="searchInput">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="new">New</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>                                   
+                                </select>
+                            </div>                           
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="filterPrescriptions()">
+                                    <i class="fas fa-filter"></i> Filter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Cards -->
+                    <div id="prescriptionsList" class="prescriptions-list">
+                        @foreach (var item in Model.OrderByDescending(m => m.Status).ThenByDescending(m => m.DateIssued))
+                        {
+                            <div class="prescription-card"
+                                 data-patient="@item.Patient.FirstName @item.Patient.LastName"
+                                 data-doctor="@item.User.FullName"
+                                 data-status="@(item?.Status?.ToLower() ?? "unknown")">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h5 class="card-title">@item.Patient.FirstName @item.Patient.LastName</h5>
+                                            <p class="card-text mb-2">
+                                                <strong>Prescribed By:</strong> @item.User.FullName<br>
+                                                <strong>Prescribed On:</strong> @item.DateIssued.ToString("dd MMM yyyy")<br>                                         
+                                          
+                                                <strong>Status:</strong>
+                                                @{
+                                                    var status = item?.Status ?? "Unknown";
+                                                    var badgeClass = status == "Approved" ? "status-badge-sm status-delivered" :
+                                                                    status == "Processing" ? "status-badge-sm status-pending" :
+                                                                    status == "New" ? "status-badge-sm status-approved" :
+                                                                    status == "Rejected" ? "status-badge-sm status-rejected" :
+                                                                    status == "Delivered" ? "status-badge-sm status-delivered" : 
+                                                                    "status-badge-sm status-rejected";
+                                                }
+                                                <span class="@badgeClass">@status</span>
+                                                
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="action-btn primary btn-sm" 
+                                                        onclick="openPatientModal(@item.PrescriptionId)" 
+                                                        aria-label="View patient details">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                               @if(item.Status == "Approved" || item.Status == "Rejected")
+                                                {
+                                                    
+                                                    <a asp-controller="Script" asp-action="GenerateReport" asp-route-id="@item.PrescriptionId" class="primary-btn ml btn-sm">Generate Report</a>
+                                                    
+                                                }
+                                                
+                                            </div>
+                                            
+                                        </div>
+                                        <div class=""> 
+                                                
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Prescription pagination">
+                        <ul class="pagination justify-content-center" id="paginationList">
+                            <!-- JS will generate buttons -->
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Sidebar Column -->
+                <div class="col-md-3">
+                    <!-- Quick Actions -->
+                    <div class="info-card mb-3">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-controller="Script" asp-action="QuickActions" method="post" class="mb-2">
+                                <input value="1" name="type" type="hidden" />
+                                <button class="action-btn success w-100" type="submit">
+                                    <i class="fas fa-check-double"></i> Process All New
+                                </button>
+                            </form>
+                            <form asp-controller="Script" asp-action="QuickActions" method="post" class="mb-2">
+                                <input value="2" name="type" type="hidden" />
+                                <button class="action-btn primary w-100" type="submit">
+                                    <i class="fas fa-share"></i> Forward Selected
+                                </button>
+                            </form>
+                            <button class="action-btn pending w-100" onclick="generateReport()">
+                                <i class="fas fa-file-pdf"></i> Generate Report
+                            </button>                           
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clock me-2"></i>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Any())
+                            {
+                                @foreach(var act in Model.OrderByDescending(m => m.DateIssued).Take(5))
+                                {
+                                    <div class="timeline-item">
+                                        <small class="text-muted">@act.DateIssued.ToString("t")</small>
+                                        <div>Prescription for @act.Patient.FirstName is @(act.Status)</div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📋</div>
+                                    <p class="empty-state-text">No recent activity</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Modal -->
+    <div class="modal fade" id="patientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <!-- AJAX-loaded content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Open patient modal
+        function openPatientModal(PrescriptionId) {
+            $('#patientModal .modal-content').load('/Script/PatientInfoModal/' + PrescriptionId, function () {
+                var modalEl = document.getElementById('patientModal');
+                var modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            });
+        }
+
+        // Generate report
+        function generateReport() {
+            fetch('/Script/GenerateReports')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Create a download link
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Prescription Report.pdf";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    // Show Bootstrap alert dynamically
+                    showAlert('Report generated successfully.', 'success');
+                })
+                .catch(err => {
+                    showAlert('Failed to generate report.', 'danger');
+                });
+        }
+
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            const alertDiv = document.createElement("div");
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.role = "alert";
+            alertDiv.style.position = "fixed";
+            alertDiv.style.top = "20px";
+            alertDiv.style.right = "20px";
+            alertDiv.style.zIndex = "1050";
+            alertDiv.style.minWidth = "250px";
+
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 5000);
+        }
+
+        // Auto-close TempData alert
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                var alert = document.getElementById('autoCloseAlert');
+                if (alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        });
+
+        // Search & Filter
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const priorityFilter = document.getElementById('priorityFilter');
+
+            function filterPrescriptions() {
+                const searchTerm = (searchInput?.value || '').toLowerCase();
+                const status = (statusFilter?.value || '').toLowerCase();
+                const priority = (priorityFilter?.value || '').toLowerCase();
+
+                const cards = document.querySelectorAll('.prescription-card');
+                cards.forEach(card => {
+                    const patient = (card.dataset.patient || '').toLowerCase();
+                    const doctor = (card.dataset.doctor || '').toLowerCase();
+                    const cardStatus = (card.dataset.status || '').toLowerCase();
+                    const cardPriority = (card.dataset.priority || '').toLowerCase();
+
+                    const matchesSearch = !searchTerm || patient.includes(searchTerm) || doctor.includes(searchTerm);
+                    const matchesStatus = !status || cardStatus === status;
+                    const matchesPriority = !priority || cardPriority === priority;
+
+                    if (matchesSearch && matchesStatus && matchesPriority) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            // Expose function globally
+            window.filterPrescriptions = filterPrescriptions;
+
+            // Attach listeners
+            if (searchInput) searchInput.addEventListener('input', filterPrescriptions);
+            if (statusFilter) statusFilter.addEventListener('change', filterPrescriptions);
+            if (priorityFilter) priorityFilter.addEventListener('change', filterPrescriptions);
+
+            // Run once on load
+            filterPrescriptions();
+        });
+    </script>
+}
+else
+{
+    <div class="dashboard-wrapper">
+        <div class="container-fluid">
+            <div class="page-header">
+                <h2 class="text-center mb-0">Access Denied</h2>
+                <p class="text-center text-muted">You don't have permission to access the Script Dashboard</p>
+            </div>
+        </div>
+    </div>
+}

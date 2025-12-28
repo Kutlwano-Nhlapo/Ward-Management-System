@@ -1,0 +1,752 @@
+﻿@{
+    ViewData["Title"] = "Reports";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="reports-wrapper">
+   
+    <div class="reports-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <h1 class="page-title">Hospital Reports & Analytics</h1>
+                    <p class="page-subtitle">Comprehensive facility performance metrics and insights</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" onclick="window.print()">
+                    <i class="bi bi-printer"></i>
+                    Print Report
+                </button>
+                @* <button class="action-btn primary">
+                    <i class="bi bi-download"></i>
+                    Export Data
+                </button> *@
+            </div>
+        </div>
+
+        <!-- Reports Grid -->
+        <div class="reports-grid">
+            <!-- Medication Stock -->
+            <div class="report-card medication-card">
+                <div class="card-header">
+                    <div class="card-icon medication-icon">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+                    <h2 class="card-title">Medication Stock</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="medicationChart"></canvas>
+                </div>
+                <div class="card-footer">
+                    <div class="info-badge warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Low stock: @string.Join(", ", ViewBag.LowStockMeds)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bed Occupancy -->
+            <div class="report-card bed-card">
+                <div class="card-header">
+                    <div class="card-icon bed-icon">
+                        <i class="bi bi-hospital"></i>
+                    </div>
+                    <h2 class="card-title">Bed Occupancy</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="bedChart"></canvas>
+                </div>
+                <div class="card-footer">
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value">@((ViewBag.BedData as List<int>).Sum())</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Occupied</span>
+                            <span class="stat-value occupied">@((ViewBag.BedData as List<int>)[1])</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Available</span>
+                            <span class="stat-value available">@((ViewBag.BedData as List<int>)[2])</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ward Occupancy -->
+            <div class="report-card ward-card">
+                <div class="card-header">
+                    <div class="card-icon ward-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h2 class="card-title">Ward Occupancy</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="wardChart"></canvas>
+                </div>
+                <div class="card-footer">
+                    <div class="info-badge info">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Occupied beds by ward</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Allergies -->
+            <div class="report-card allergy-card">
+                <div class="card-header">
+                    <div class="card-icon allergy-icon">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <h2 class="card-title">Patient Allergies</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="allergyChart"></canvas>
+                </div>
+                <div class="card-footer">
+                    <div class="info-badge success">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Allergy distribution tracked</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Trends - Full Width -->
+            <div class="report-card patient-card full-width">
+                <div class="card-header">
+                    <div class="card-icon patient-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h2 class="card-title">Patient Admissions Trend</h2>
+                    <span class="card-badge">Last 7 Days</span>
+                </div>
+                <div class="chart-container large">
+                    <canvas id="patientTrendChart"></canvas>
+                </div>
+                <div class="card-footer">
+                    <div class="info-badge primary">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Daily admission tracking</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart.js default configuration
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#99ddff ';
+
+    // Medication Chart
+    new Chart(document.getElementById('medicationChart'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MedicationLabels)),
+            datasets: [
+                {
+                    label: 'Stock',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MedicationStockData)),
+                    backgroundColor: '#99ddff ',
+                    borderRadius: 8,
+                    borderWidth: 0
+                },
+                {
+                    label: 'Expiring Soon',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MedicationExpiringData)),
+                    backgroundColor: '#ff6b6b',
+                    borderRadius: 8,
+                    borderWidth: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: { size: 12, weight: '600' }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Bed Chart
+    new Chart(document.getElementById('bedChart'), {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.BedLabels)),
+            datasets: [{
+                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.BedData)),
+                backgroundColor: ['#99ddff ', '#4facfe'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: { size: 12, weight: '600' }
+                    }
+                }
+            }
+        }
+    });
+
+    // Ward Occupancy
+    new Chart(document.getElementById('wardChart'), {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.WardLabels)),
+            datasets: [{
+                label: 'Occupied Beds',
+                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.WardOccupancy)),
+                backgroundColor: '#99ddff ',
+                borderRadius: 8,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Allergies Chart
+    new Chart(document.getElementById('allergyChart'), {
+        type: 'pie',
+        data: {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.AllergyLabels)),
+            datasets: [{
+                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.AllergyData)),
+                backgroundColor: ['#99ddff ','#4facfe','#e6f7ff','#4facfe','#43e97b'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        font: { size: 12, weight: '600' }
+                    }
+                }
+            }
+        }
+    });
+
+    // Patient Trends
+    new Chart(document.getElementById('patientTrendChart'), {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.PatientTrendLabels)),
+            datasets: [{
+                label: 'Admissions',
+                data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.AdmissionsData)),
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: '#99ddff',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Add smooth fade-in animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.report-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+
+<style>
+    :root {
+        --primary-purple: #667eea;
+        --primary-dark: #764ba2;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --success-color: #43e97b;
+        --warning-color: #fbbf24;
+        --danger-color: #ff6b6b;
+        --info-color: #4facfe;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .reports-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        position: relative;
+        padding: 2rem ;
+    }
+
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .floating-element {
+        position: absolute;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 10%;
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-delay: 4s;
+        }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+            opacity: 0.7;
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+            opacity: 0.3;
+        }
+    }
+
+    .reports-container {
+        position: relative;
+        z-index: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 1rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 0 2rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 100px;
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        width: 70px;
+        height: 70px;
+        background: #99ddff;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--border-color);
+        background: white;
+        color: var(--text-primary);
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+    /* Reports Grid */
+    .reports-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .report-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .report-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Card Header */
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .medication-icon {
+        background: #99ddff;
+    }
+
+    .bed-icon {
+        background: #99ddff;
+    }
+
+    .ward-icon {
+        background: #99ddff;
+    }
+
+    .allergy-icon {
+        background: #99ddff;
+    }
+
+    .patient-icon {
+        background: #99ddff;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex: 1;
+    }
+
+    .card-badge {
+        padding: 0.25rem 0.75rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Chart Container */
+    .chart-container {
+        height: 300px;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+        .chart-container.large {
+            height: 350px;
+        }
+
+    /* Card Footer */
+    .card-footer {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+        .info-badge.warning {
+            background: rgba(251, 191, 36, 0.1);
+            color: #f59e0b;
+        }
+
+        .info-badge.success {
+            background: rgba(67, 233, 123, 0.1);
+            color: #10b981;
+        }
+
+        .info-badge.info {
+            background: rgba(79, 172, 254, 0.1);
+            color: #3b82f6;
+        }
+
+        .info-badge.primary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+    /* Stats Row */
+    .stats-row {
+        display: flex;
+        justify-content: space-around;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        flex: 1;
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+        .stat-value.occupied {
+            color: #ff6b6b;
+        }
+
+        .stat-value.available {
+            color: #4facfe;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .reports-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .header-content {
+            flex-direction: column;
+        }
+
+        .header-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .reports-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+
+            .chart-container.large {
+                height: 300px;
+            }
+    }
+
+    @@media print {
+        .header-actions {
+            display: none;
+        }
+
+        .report-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>

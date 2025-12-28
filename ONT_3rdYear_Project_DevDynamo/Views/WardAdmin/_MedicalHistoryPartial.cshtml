@@ -1,0 +1,52 @@
+﻿@model IEnumerable<ONT_3rdyear_Project.Models.MedicalHistory>
+@{
+    int patientId = ViewBag.PatientId;
+}
+@if (!Model.Any())
+{
+    <p>No medical history found.</p>
+    <form id="addHistoryForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="PatientId" value="@patientId" />
+        <div class="mb-3">
+            <label>Condition</label>
+            <input name="ChronicCondition" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Medication History</label>
+            <input name="MedicationHistory" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Past Surgical History</label>
+            <input name="PastSurgicalHistory" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>ConditionSeverity</label>
+            <select name="ConditonSeverity" class="form-select" required>
+            <option value="">--Select Severity--</option>
+   
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Recorder Date</label>
+            <input name="RecorderDate" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-success">Add</button>
+    </form>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var h in Model)
+        {
+            <li class="list-group-item">
+                <strong>@h.ChronicCondition</strong>
+                <strong>@h.MedicationHistory</strong>
+                <strong>@h.PastSurgicalHistory</strong>
+                <strong>@h.ConditonSeverity</strong>
+                <strong>@h.RecorderDate.ToShortDateString()</strong>
+            </li>
+        }
+    </ul>
+}
+

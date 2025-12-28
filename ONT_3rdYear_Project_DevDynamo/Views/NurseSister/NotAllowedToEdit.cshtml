@@ -1,0 +1,20 @@
+﻿@model ONT_3rdyear_Project.Models.PatientMedicationScript
+
+@{
+    ViewData["Title"] = "Restricted Edit";
+}
+
+<div class="alert alert-danger mt-4">
+    <h4>You cannot edit this medication.</h4>
+    <p>This medication was administered by a nurse and is not editable by a Nursing Sister because it is not a Schedule 5 or 6 medication.</p>
+</div>
+
+<div class="mt-4">
+    <strong>Patient:</strong> @Model.Patient?.FirstName @Model.Patient?.LastName <br />
+    <strong>Medication:</strong> @Model.Medication?.Name <br />
+    <strong>Schedule:</strong> @Model.Medication?.Schedule <br />
+    <strong>Dosage:</strong> @Model.Dosage <br />
+    <strong>Administered Date:</strong> @Model.AdministeredDate.ToShortDateString()
+</div>
+
+<a asp-action="ListAdministered" class="btn btn-secondary mt-3">Back to List</a>

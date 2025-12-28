@@ -1,0 +1,11 @@
+﻿@model string
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    var isSuccess = Model.ToLower().Contains("success") || Model.ToLower().Contains("confirmed");
+    var alertClass = isSuccess ? "alert-success" : "alert-danger";
+
+    <div class="alert @alertClass" role="alert">
+        @Model
+    </div>
+}

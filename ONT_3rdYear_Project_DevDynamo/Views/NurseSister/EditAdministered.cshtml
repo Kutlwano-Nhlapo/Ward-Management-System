@@ -1,0 +1,881 @@
+﻿@model ONT_3rdyear_Project.ViewModels.AdministerMedicationViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Edit Administered Medication";
+}
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+}
+
+@functions {
+    private string GetPrescriptionDosage(int prescriptionId, int medicationId)
+    {
+        // This is a simplified version - you might need to query your database
+        // For now, return empty string and let JavaScript handle it dynamically
+        return "";
+    }
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* CSS Variables matching Vitals.css */
+    :root {
+        --primary-blue: #0077be;
+        --primary-light: #e8f4fd;
+        --secondary-teal: #00a693;
+        --accent-green: #28a745;
+        --warning-orange: #fd7e14;
+        --danger-red: #dc3545;
+        --text-primary: #1a365d;
+        --text-secondary: #4a5568;
+        --bg-primary: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --success-color: #28a745;
+        --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-heavy: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --gradient-medical: linear-gradient(135deg, #0077be 0%, #00a693 100%);
+    }
+
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .patients-wrapper {
+        min-height: 100vh;
+        background: url(/images/bcgr.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        position: relative;
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        padding-bottom: 2rem;
+    }
+
+    /* Header Styles matching Vitals */
+    .patients-header {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        z-index: 1;
+        margin-top: 5px;
+        max-width: 1340px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--primary-blue);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s ease;
+    }
+
+        .breadcrumb-link:hover {
+            color: var(--secondary-teal);
+            text-decoration: underline;
+        }
+
+        .breadcrumb-link i {
+            margin-right: 0.5rem;
+        }
+
+    .breadcrumb-nav .bi-chevron-right {
+        margin: 0 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .title-section {
+        flex: 1;
+    }
+
+    .page-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 2rem;
+        padding: 90px 0 20px 0;
+    }
+
+        .page-title i {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+        }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 0;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Main Content */
+    .patients-content {
+        padding: 2rem 0 4rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form Container matching Vitals cards */
+    .form-container {
+        background: #e6f7ff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+    }
+
+        .cards-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .cards-header h3 i {
+                color: var(--primary-blue);
+            }
+
+    /* Patient Info Card */
+    .patient-info-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .patient-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .patient-label i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+    .patient-name {
+        font-size: 1.4rem;
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+    }
+
+    /* Form Groups */
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label-custom {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .form-label-custom i {
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+            width: 16px;
+            text-align: center;
+        }
+
+    .required-field::after {
+        content: " *";
+        color: var(--danger-red);
+        font-weight: bold;
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: var(--bg-card);
+        width: 100%;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(0, 119, 190, 0.25);
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .form-control[readonly] {
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+    /* Select Wrapper */
+    .select-wrapper {
+        position: relative;
+    }
+
+        .select-wrapper::after {
+            content: "▼";
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            font-size: 0.75rem;
+        }
+
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 3rem;
+        cursor: pointer;
+    }
+
+    /* Input Groups with Units */
+    .dosage-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .dosage-unit {
+        position: absolute;
+        right: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        pointer-events: none;
+        background: var(--bg-card);
+        padding: 0 0.25rem;
+    }
+
+    .dosage-input {
+        padding-right: 3.5rem;
+    }
+
+    /* Prescription Field */
+    .prescription-field {
+        background: var(--primary-light);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    /* Alert Messages */
+    .alert {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .alert-danger {
+        border-left: 4px solid var(--danger-red);
+        background: #f8d7da;
+    }
+
+        .alert-danger i {
+            color: var(--danger-red);
+            font-size: 1.2rem;
+            margin-top: 0.125rem;
+        }
+
+    /* Buttons matching Vitals */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background: #0066a6;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+    /* Action Buttons */
+    .action-buttons {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Validation Messages */
+    .text-danger {
+        color: var(--danger-red) !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .text-danger::before {
+            content: "⚠";
+            font-size: 0.75rem;
+        }
+
+    /* Toast Messages */
+    .toast-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--accent-green);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-heavy);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: 9999;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Animation */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    
+
+    .main-content {
+        transition: margin-left 0.3s ease;
+    }
+
+        .main-content.sidebar-open {
+            margin-left: 280px;
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .patients-header,
+        .form-container {
+            max-width: 95%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .patients-content {
+            padding: 1rem 0 2rem;
+        }
+
+        .form-container {
+            margin: 0 1rem;
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            padding: 60px 0 15px 0;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .prescription-field, .alert {
+            padding: 1rem;
+        }
+
+        .sidebar {
+            width: 250px;
+            left: -250px;
+        }
+
+        .sidebar-toggle.open {
+            left: 270px;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 0;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .form-container {
+            padding: 0.75rem;
+        }
+
+        .patient-info-card, .prescription-field, .alert {
+            padding: 1rem;
+        }
+
+        .patient-name {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<div class="patients-wrapper">
+   
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Header Section -->
+        <div class="patients-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="breadcrumb-nav">
+                        <a asp-controller="@(roles.Contains("Nurse") ? "Nurse" : "NurseSister")" asp-action="Dashboard" class="breadcrumb-link">
+                            <i class="bi bi-house-door"></i>
+                            Dashboard
+                        </a>
+                        <i class="bi bi-chevron-right"></i>
+                        <a asp-controller="@(roles.Contains("Nurse") ? "Nurse" : "NurseSister")" asp-action="ListAdministered" class="breadcrumb-link">
+                            Administered Medications
+                        </a>
+                        <i class="bi bi-chevron-right"></i>
+                        <span class="breadcrumb-current">Edit Administration</span>
+                    </div>
+                    <div class="title-section">
+                        <h1 class="page-title">
+                            <i class="fas fa-edit"></i>
+                            Edit Administered Medication
+                        </h1>
+                        <p class="page-subtitle">Update medication administration details and prescription information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="patients-content">
+            <div class="container">
+                <div class="form-container">
+                    <div class="cards-header">
+                        <h3>
+                            <i class="fas fa-pills"></i>
+                            Edit Medication Administration
+                        </h3>
+                    </div>
+
+                    <!-- Patient Info Card -->
+                    <div class="patient-info-card">
+                        <div class="patient-label">
+                            <i class="fas fa-user-injured"></i>
+                            Patient Information
+                        </div>
+                        <p class="patient-name">@Model.PatientName</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form asp-action="EditAdministered" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="PatientId" />
+                        <input type="hidden" asp-for="RequiresPrescription" id="RequiresPrescription" />
+                        <input type="hidden" asp-for="PatientName" />
+
+                        <!-- Medication Selection -->
+                        <div class="form-group-custom">
+                            <label asp-for="MedicationId" class="form-label-custom required-field">
+                                <i class="fas fa-capsules"></i>
+                                Medication
+                            </label>
+                            <div class="select-wrapper">
+                                <select asp-for="MedicationId"
+                                        class="form-control"
+                                        asp-items="Model.MedicationList"
+                                        id="MedicationId"
+                                        onchange="updateSchedule(this)"
+                                        disabled>
+                                    <option value="">-- Select Medication --</option>
+                                </select>
+                            </div>
+                            <input type="hidden" asp-for="MedicationId" />
+                            <span asp-validation-for="MedicationId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Prescription Field (Dynamic) -->
+                        <div id="prescriptionField" style="@(Model.RequiresPrescription ? "" : "display:none;")" class="form-group-custom">
+                            @if (Model.RequiresPrescription)
+                            {
+                                if (Model.PrescriptionList != null && Model.PrescriptionList.Any())
+                                {
+                                    <div class="prescription-field">
+                                        <label asp-for="PrescriptionId" class="form-label-custom">
+                                            <i class="fas fa-prescription"></i>
+                                            Select Prescription
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select asp-for="PrescriptionId" class="form-control" id="PrescriptionId">
+                                                <option value="">-- Select Prescription --</option>
+                                                @foreach (var item in Model.PrescriptionList)
+                                                {
+                                                    // Get dosage for this prescription
+                                                    var dosage = GetPrescriptionDosage(int.Parse(item.Value), Model.MedicationId);
+                                                    <option value="@item.Value" selected="@item.Selected" data-dosage="@dosage">
+                                                        @item.Text
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <span asp-validation-for="PrescriptionId" class="text-danger"></span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <div>
+                                            <strong>Prescription Required</strong>
+                                            <p>This medication requires a prescription, but no approved prescription was found.</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Dosage -->
+                        <div class="form-group-custom">
+                            <label asp-for="Dosage" class="form-label-custom">
+                                <i class="fas fa-prescription-bottle-alt"></i>
+                                Dosage
+                            </label>
+                            <div class="dosage-input-group">
+                                <input asp-for="Dosage" class="form-control dosage-input" placeholder="Enter dosage amount" id="Dosage" />
+                                <span class="dosage-unit">mg</span>
+                            </div>
+                            <span asp-validation-for="Dosage" class="text-danger"></span>
+                        </div>
+
+                        <!-- Administration Date -->
+                        <div class="form-group-custom">
+                            <label asp-for="AdministeredDate" class="form-label-custom">
+                                <i class="fas fa-calendar-alt"></i>
+                                Administration Date
+                            </label>
+                            <input asp-for="AdministeredDate" type="datetime-local" class="form-control" readonly />
+                            <span asp-validation-for="AdministeredDate" class="text-danger"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                            <a asp-controller="@(roles.Contains("Nurse") ? "Nurse" : "NurseSister")"
+                               asp-action="ListAdministered" class="btn btn-secondary cancel-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Medications
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        let isInitializing = true;
+        function updateSchedule(select) {
+            const selected = select.options[select.selectedIndex];
+            const schedule = parseInt(selected.text.match(/Schedule (\d+)/)?.[1] || 0);
+            const requiresPrescription = schedule > 4;
+            const dosageInput = document.getElementById('Dosage');
+
+            document.getElementById('RequiresPrescription').value = requiresPrescription;
+            document.getElementById('prescriptionField').style.display = requiresPrescription ? 'block' : 'none';
+
+            if (requiresPrescription) {
+                const patientId = @Model.PatientId;
+                const medicationId = select.value;
+
+                // Only fetch if a medication is selected
+                if (medicationId) {
+                    fetch(`/NurseSister/GetPrescriptions?patientId=${patientId}&medicationId=${medicationId}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            const prescriptionSelect = document.getElementById('PrescriptionId');
+                            if (prescriptionSelect) {
+                                // Save the current selection
+                                const currentSelection = prescriptionSelect.value;
+
+                                // Clear existing options but keep the first one
+                                const firstOption = prescriptionSelect.options[0];
+                                prescriptionSelect.innerHTML = '';
+                                if (firstOption) {
+                                    prescriptionSelect.appendChild(firstOption);
+                                }
+
+                                // Add new options from the fetched data
+                                data.forEach(p => {
+                                    const opt = document.createElement('option');
+                                    opt.value = p.prescriptionId;
+                                    opt.text = "Prescription #" + p.prescriptionId;
+                                    opt.setAttribute('data-dosage', p.dosage || '');
+                                    prescriptionSelect.appendChild(opt);
+                                });
+
+                                // Restore previous selection if it still exists, or auto-select if only one
+                                if (currentSelection && Array.from(prescriptionSelect.options).some(opt => opt.value === currentSelection)) {
+                                    prescriptionSelect.value = currentSelection;
+                                } else if (data.length === 1) {
+                                    prescriptionSelect.value = data[0].prescriptionId;
+                                    // Auto-fill dosage if available
+                                    if (data[0].dosage && dosageInput) {
+                                        dosageInput.value = data[0].dosage;
+                                        showToast(`Dosage auto-filled from prescription: ${data[0].dosage}`);
+                                    }
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error loading prescriptions:", err);
+                            // If fetch fails, keep the existing options
+                        });
+                }
+            } else {
+                // Clear dosage if prescription not required
+                if (dosageInput && !isInitializing) {
+                    dosageInput.value = '';
+            }
+        }
+
+        // Add event listener for prescription selection changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const prescriptionSelect = document.getElementById('PrescriptionId');
+            const dosageInput = document.getElementById('Dosage');
+
+            if (prescriptionSelect && dosageInput) {
+                prescriptionSelect.addEventListener('change', function() {
+                    if (isInitializing) return;
+                    const selectedOption = this.options[this.selectedIndex];
+                    const dosage = selectedOption.getAttribute('data-dosage');
+                    if (dosage) {
+                        dosageInput.value = dosage;
+                        showToast(`Dosage auto-filled from prescription: ${dosage}`);
+                    }
+                });
+            }
+        });
+
+        // Toast notification function
+        function showToast(message) {
+            // Create toast element
+            var toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            // Animate and remove after 3 seconds
+            setTimeout(function() {
+                toast.style.opacity = '1';
+                setTimeout(function() {
+                    toast.style.opacity = '0';
+                    setTimeout(function() {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 500);
+                }, 2500);
+            }, 100);
+        }
+
+               window.onload = function () {
+            const select = document.getElementById("MedicationId");
+            const dosageInput = document.getElementById('Dosage');
+
+            if (select) {
+                // Initialize the form based on current medication
+                updateSchedule(select);
+            }
+
+            // Set dosage from model data immediately
+            const currentDosage = '@Model.Dosage';
+            if (currentDosage && dosageInput && !dosageInput.value) {
+                dosageInput.value = currentDosage;
+            }
+
+            // Auto-fill dosage from existing prescription if available (after delay)
+            setTimeout(() => {
+                const currentPrescriptionId = '@Model.PrescriptionId';
+                if (currentPrescriptionId && dosageInput) {
+                    const prescriptionSelect = document.getElementById('PrescriptionId');
+                    if (prescriptionSelect) {
+                        const currentOption = Array.from(prescriptionSelect.options).find(opt => opt.value === currentPrescriptionId);
+                        if (currentOption) {
+                            const dosage = currentOption.getAttribute('data-dosage');
+                            if (dosage && !dosageInput.value) {
+                                dosageInput.value = dosage;
+                            }
+                        }
+                    }
+                }
+
+                // Final fallback to model dosage
+                if (currentDosage && dosageInput && (!dosageInput.value || dosageInput.value === '')) {
+                    dosageInput.value = currentDosage;
+                }
+
+                // Mark initialization as complete
+                isInitializing = false;
+            }, 1000);
+        };
+    </script>
+
+    <script>
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetUrl = this.getAttribute('href');
+
+                Swal.fire({
+                    title: 'Discard changes?',
+                    text: "Any unsaved data will be lost.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, go back',
+                    cancelButtonText: 'Stay here'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = targetUrl;
+                    }
+                });
+            });
+        });
+    </script>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

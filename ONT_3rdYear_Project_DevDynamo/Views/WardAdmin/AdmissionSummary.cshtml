@@ -1,0 +1,468 @@
+﻿@model ONT_3rdyear_Project.WardAdminViewModels.AdmissionSummaryViewModel
+@{
+    ViewData["Title"] = "Admission Summary";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="~/css/WardAdmin/AdmissionSummary.css" rel="stylesheet" asp-append-version="true">
+
+<div class="admission-summary-wrapper">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="summary-header">
+            <div class="back-button">
+                <a asp-action="AdmitPatientStep3" asp-route-patientId="@Model.Step1?.PatientID" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Medical History
+                </a>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step">
+                    <div class="step-number completed">1</div>
+                    <span class="step-label">Basic Info</span>
+                </div>
+                <div class="step-connector completed"></div>
+                <div class="progress-step">
+                    <div class="step-number completed">2</div>
+                    <span class="step-label">Allergies</span>
+                </div>
+                <div class="step-connector completed"></div>
+                <div class="progress-step">
+                    <div class="step-number completed">3</div>
+                    <span class="step-label">Medical History</span>
+                </div>
+                <div class="step-connector completed"></div>
+                <div class="progress-step">
+                    <div class="step-number completed">4</div>
+                    <span class="step-label">Summary</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="summary-card">
+            <div class="summary-card-header">
+                <h4>
+                    <i class="bi bi-clipboard2-check"></i>
+                    Admission Summary
+                </h4>
+            </div>
+            <div class="summary-card-body">
+                <!-- Patient & Admission Info -->
+                <div class="summary-section">
+                    <div class="section-header">
+                        <i class="bi bi-person-circle text-primary"></i>
+                        <h5>Patient & Admission Information</h5>
+                    </div>
+
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-person"></i>
+                                Patient
+                            </div>
+                            <div class="detail-value">
+                                @Model.PatientName
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-person-badge"></i>
+                                Assigned Doctor
+                            </div>
+                            <div class="detail-value">
+                                @Model.DoctorName
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-building"></i>
+                                Ward
+                            </div>
+                            <div class="detail-value">
+                                @Model.WardName
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-bed"></i>
+                                Bed
+                            </div>
+                            <div class="detail-value">
+                                @Model.BedNo
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-calendar-event"></i>
+                                Admission Date
+                            </div>
+                            <div class="detail-value">
+                                @Model.Step1?.AdmissionDate.ToString("dd MMMM yyyy")
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="bi bi-clipboard-plus"></i>
+                                Reason for Admission
+                            </div>
+                            <div class="detail-value">
+                                @Model.Step1?.ReasonForAdmission
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Step1?.Notes))
+                        {
+                            <div class="detail-item">
+                                <div class="detail-label">
+                                    <i class="bi bi-journal-text"></i>
+                                    Additional Notes
+                                </div>
+                                <div class="detail-value">
+                                    @Model.Step1.Notes
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Allergies Section -->
+                <div class="summary-section">
+                    <div class="section-header">
+                        <i class="bi bi-exclamation-triangle text-danger"></i>
+                        <h5>Allergies</h5>
+                    </div>
+
+                    @if (Model.Step2?.Allergies != null && Model.Step2.Allergies.Any())
+                    {
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Allergy</th>
+                                    <th>Severity</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var allergy in Model.Step2.Allergies)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>@allergy.ResolvedName</strong>
+                                                @if (allergy.SelectedAllergyId == 0 && !string.IsNullOrEmpty(allergy.OtherAllergyDescription))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">@allergy.OtherAllergyDescription</small>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge severity-@allergy.Severity?.ToLower()">
+                                                @allergy.Severity
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(allergy.Notes))
+                                            {
+                                                @allergy.Notes
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No notes</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle"></i>
+                            <h6>No Allergies Recorded</h6>
+                            <p>No allergies were documented for this patient</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Medical History Section -->
+                <div class="summary-section">
+                    <div class="section-header">
+                        <i class="bi bi-heart-pulse text-success"></i>
+                        <h5>Medical History</h5>
+                    </div>
+
+                    @if (Model.Step3?.MedicalHistories != null && Model.Step3.MedicalHistories.Any())
+                    {
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Chronic Condition</th>
+                                    <th>Medication History</th>
+                                    <th>Past Surgeries</th>
+                                    <th>Severity</th>
+                                    <th>Recorded Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var history in Model.Step3.MedicalHistories)
+                                {
+                                    <tr>
+                                        <td><strong>@history.ChronicCondition</strong></td>
+                                        <td>@(!string.IsNullOrEmpty(history.MedicationHistory) ? history.MedicationHistory : "None recorded")</td>
+                                        <td>@(!string.IsNullOrEmpty(history.PastSurgicalHistory) ? history.PastSurgicalHistory : "None recorded")</td>
+                                        <td>
+                                            <span class="status-badge severity-@history.ConditionSeverity?.ToLower()">
+                                                @history.ConditionSeverity
+                                            </span>
+                                        </td>
+                                        <td>@history.RecorderDate.ToString("dd MMM yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-file-medical"></i>
+                            <h6>No Medical History</h6>
+                            <p>No medical conditions were documented</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="summary-actions">
+                    <a asp-action="AdmitPatientStep3" asp-route-patientId="@Model.Step1?.PatientID" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Back to Medical History
+                    </a>
+
+                    <form asp-action="ConfirmAdmission" method="post">
+                        <input type="hidden" name="admissionId" value="@Model.Step1?.AdmissionID" />
+                        <input type="hidden" name="patientId" value="@Model.Step1?.PatientID" />
+
+                        <button type="submit" class="btn-confirm">
+                            <i class="bi bi-check-circle"></i>
+                            Confirm Admission
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon"><i class="bi bi-list-check"></i></div>
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Completed Steps</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div class="stat-number">@((Model.Step2?.Allergies?.Count ?? 0))</div>
+                    <div class="stat-label">Allergies</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon"><i class="bi bi-file-medical"></i></div>
+                    <div class="stat-number">@((Model.Step3?.MedicalHistories?.Count ?? 0))</div>
+                    <div class="stat-label">Medical Conditions</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                    <div class="stat-number">@DateTime.Now.ToString("dd")</div>
+                    <div class="stat-label">Today's Date</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Add celebration effect on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.summary-card-header');
+            header.style.animation = 'celebrate 1s ease';
+            setTimeout(() => {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }, 500);
+        });
+
+        // Print functionality
+        function printSummary() {
+            window.print();
+        }
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Processing...';
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 5000);
+        });
+
+        window.scrollTo(0, 0);
+    </script>
+}
+
+    <style>
+        /* Celebration animation */
+        @@keyframes celebrate {
+            0%
+
+        {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+
+        50% {
+            transform: scale(1.02);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            from
+
+        {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .stat-card .stat-icon {
+                width: 50px;
+                height: 50px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1rem;
+                background: var(--primary-light);
+                color: var(--primary-blue);
+            }
+
+            .stat-card .stat-number {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--primary-blue);
+                margin-bottom: 0.25rem;
+            }
+
+            .stat-card .stat-label {
+                color: var(--text-secondary);
+                font-weight: 500;
+            }
+
+        @@media print {
+            .back-button,
+            .summary-actions,
+            .floating-elements,
+            .progress-container,
+            .row.mt-4 {
+                display: none !important;
+            }
+
+            .admission-summary-wrapper {
+                background: white !important;
+            }
+
+            .summary-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+
+            .summary-card-header {
+                background: #f8f9fa !important;
+                color: #000 !important;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .row.mt-4 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+                .stat-card .stat-number {
+                    font-size: 1.5rem;
+                }
+        }
+
+        @@media (max-width: 576px) {
+            .row.mt-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
